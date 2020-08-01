@@ -1,10 +1,9 @@
 #pragma once
 #include "App.h"
 #include "Box.h"
+#include "Cylinder.h"
 #include "SkinnedBox.h"
-#include "Melon.h"
 #include "Pyramid.h"
-#include "Sheet.h"
 #include <optional>
 #include <sstream>
 #include <iomanip>
@@ -30,23 +29,34 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 		std::unique_ptr<Drawable> operator()()
 		{
 			const DirectX::XMFLOAT3 mat = { cdist(rng), cdist(rng), cdist(rng) };
-			return std::make_unique<Box>(
-				gfx, rng, adist, ddist,
-				odist, rdist, bdist,
-				mat
-				);
-			/*switch (typedist(rng))
+
+			switch (sdist(rng))
 			{
 			case 0:
+				return std::make_unique<Box>(
+					gfx, rng, adist, ddist,
+					odist, rdist, bdist, mat
+					);
+			case 1:
+				return std::make_unique<Cylinder>(
+					gfx, rng, adist, ddist, odist,
+					rdist,bdist ,tdist
+					);
+			case 2:
 				return std::make_unique<Pyramid>(
+					gfx, rng, adist, ddist, odist,
+					rdist, tdist
+					);
+			case 3:
+				return std::make_unique<SkinnedBox>(
 					gfx, rng, adist, ddist,
 					odist, rdist
 					);
-			case 1:
-				return std::make_unique<Box>(
-					gfx, rng, adist, ddist,
-					odist, rdist, bdist
-					);
+			default:
+				assert(false && "impossible drawable option in factory");
+				return {};
+			}
+			/*
 			case 2:
 				return std::make_unique<Melon>(
 					gfx, rng, adist, ddist,
@@ -70,6 +80,7 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 	private:
 		Graphics& gfx;
 		std::mt19937 rng{ std::random_device{}() };
+		std::uniform_int_distribution<int> sdist{ 0,3 };
 		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
 		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
 		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
@@ -79,6 +90,7 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 		std::uniform_int_distribution<int> latdist{ 5,20 };
 		std::uniform_int_distribution<int> longdist{ 10,40 };
 		std::uniform_int_distribution<int> typedist{ 0,4 };
+		std::uniform_int_distribution<int> tdist{ 3,30 };
 	};
 
 	Factory f(wnd.GetGraphics());
@@ -110,7 +122,7 @@ void App::DoFrame()
 	wnd.GetGraphics().BeginFrame(0, 0, 0);
 	wnd.GetGraphics().SetCamera(cam.GetMatrix());
 
-	Light.Bind(wnd.GetGraphics());
+	Light.Bind(wnd.GetGraphics(),wnd.GetGraphics().GetCamera());
 	for (auto& b : drawables)
 	{
 		b->Update(wnd.kbd.KeyIsPressed(VK_SPACE) ? 0.0f : dt);

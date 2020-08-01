@@ -12,16 +12,7 @@ Box::Box(Graphics& gfx, std::mt19937& rng,
 	DirectX::XMFLOAT3 materialColor
 	)
 	:
-	r(rdist(rng)),
-	dxRot(ddist(rng)),
-	dyRot(ddist(rng)),
-	dzRot(ddist(rng)),
-	dphi(odist(rng)),
-	dtheta(odist(rng)),
-	dchi(odist(rng)),
-	chi(adist(rng)),
-	theta(adist(rng)),
-	phi(adist(rng))
+	TestObj(gfx,rng,adist,ddist,odist,rdist)
 {
 
 	//box는 TransCBuf즉, 객체의 위치를 제외하고는 모든 bindable
@@ -78,10 +69,10 @@ Box::Box(Graphics& gfx, std::mt19937& rng,
 
 	struct PSMaterialConstant
 	{
-		alignas(16) DirectX::XMFLOAT3 color;
+		DirectX::XMFLOAT3 color;
 		float specularInten = 0.6f;
 		float specularPower = 30.0f;
-		float padd[2];
+		float padd[3];
 	} colorConst;
 
 	colorConst.color = materialColor;
@@ -92,16 +83,6 @@ Box::Box(Graphics& gfx, std::mt19937& rng,
 		DirectX::XMMatrixScaling(1.0f, 1.0f, bdist(rng))
 	);
 
-}
-
-void Box::Update(float dt) noexcept
-{
-	xRot += dxRot * dt;
-	yRot += dyRot * dt;
-	zRot += dzRot * dt;
-	theta += dtheta * dt;
-	phi += dphi * dt;
-	chi += dchi * dt;
 }
 
 DirectX::XMMATRIX Box::GetTransformXM() const noexcept
