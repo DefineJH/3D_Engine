@@ -97,8 +97,16 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 	drawables.reserve(nDrawable);
 	std::generate_n(std::back_inserter(drawables), nDrawable, f);
 
+	for (auto i = 0; i < drawables.size(); i++)
+	{
+		Box * boxptr = dynamic_cast<Box*>(drawables[i].get());
+		if (boxptr != nullptr)
+		{
+			boxes.push_back(boxptr);
+		}
+	}
 
-	wnd.GetGraphics().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 40.0f));
+	wnd.GetGraphics().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 1000.0f));
 }
 App::~App()
 {}
@@ -118,7 +126,7 @@ int App::Go()
 
 void App::DoFrame()
 {
-	auto dt = timer.Mark() * speedFactor;
+	auto dt = timer.Mark() * speedFactors;
 	wnd.GetGraphics().BeginFrame(0, 0, 0);
 	wnd.GetGraphics().SetCamera(cam.GetMatrix());
 
@@ -134,13 +142,50 @@ void App::DoFrame()
 	static char buffer[1024];
 	if (ImGui::Begin("Simulation Speed"))
 	{
-		ImGui::SliderFloat("Speed Factor", &speedFactor, 0.1f, 3.0f);
+		ImGui::SliderFloat("Speed Factor", &speedFactors, 0.1f, 3.0f);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",1000.0f / ImGui::GetIO().Framerate , ImGui::GetIO().Framerate);
 	}
 	ImGui::End();
+
+	if (ImGui::Begin("Boxes"))
+	{
+		using namespace std::string_literals;
+		const auto preview = comboBoxIndex ? std::to_string(*comboBoxIndex) : "Choose a box..."s;
+		if (ImGui::BeginCombo("Box Number", preview.c_str()))
+		{
+			for (int i = 0; i < boxes.size(); i++)
+			{
+				const bool selected = *comboBoxIndex == i;
+				if (ImGui::Selectable(std::to_string(i).c_str(), selected))
+				{
+					comboBoxIndex = i;
+				}
+				if (selected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		if (ImGui::Button("Spawn Control Window") && comboBoxIndex)
+		{
+			boxControlIds.insert(*comboBoxIndex);
+			comboBoxIndex.reset();
+		}
+	}
+	ImGui::End();
+	for (auto id : boxControlIds)
+	{
+		boxes[id]->SpawnBoxControllWindow(wnd.GetGraphics());
+	}
 
 	cam.SpawnControlWindow();
 	Light.SpawnControlWindow();
 #endif
 	wnd.GetGraphics().EndFrame();
+}
+
+void App::SpawnWindow()
+{
+
 }

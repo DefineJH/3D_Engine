@@ -1,6 +1,7 @@
 #include "Box.h"
 #include "BindableBase.h"
 #include "GraphicsThrowMacro.h"
+#include "ImGUI/imgui.h"
 #include "Cube.h"
 
 Box::Box(Graphics& gfx, std::mt19937& rng, 
@@ -67,17 +68,10 @@ Box::Box(Graphics& gfx, std::mt19937& rng,
 	//transform버퍼 바인딩
 	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 
-	struct PSMaterialConstant
-	{
-		DirectX::XMFLOAT3 color;
-		float specularInten = 0.6f;
-		float specularPower = 30.0f;
-		float padd[3];
-	} colorConst;
 
-	colorConst.color = materialColor;
+	matConst.color = materialColor;
 
-	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, colorConst, 1u));
+	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, matConst, 1u));
 	DirectX::XMStoreFloat3x3(
 		&mt,
 		DirectX::XMMatrixScaling(1.0f, 1.0f, bdist(rng))
@@ -93,3 +87,30 @@ DirectX::XMMATRIX Box::GetTransformXM() const noexcept
 		DirectX::XMMatrixTranslation(r, 0.0f, 0.0f) *
 		DirectX::XMMatrixRotationRollPitchYaw(theta, phi, chi);
 }
+
+void Box::SpawnBoxControllWindow(Graphics& gfx)
+{
+	bool dirty = false;
+	if (ImGui::Begin("Box Properties"))
+	{
+		ImGui::Text("Material Properties");
+		auto cd = ImGui::ColorEdit3("Color", &matConst.color.x);
+		auto sid = ImGui::SliderFloat("Specular Intensity", &matConst.specularInten, 0.0f, 1.5f);
+		auto spd = ImGui::SliderFloat("Specular Power", &matConst.specularPower, 0.0f, 50.0f, "%.1f");
+		dirty = cd || sid || spd;
+	}
+	ImGui::End();
+	if (dirty)
+		UpdateMaterial(gfx);
+}
+
+void Box::UpdateMaterial(Graphics& gfx)
+{
+	auto pixelconstbuffer = QueryBindable<PixelConstantBuffer<PSMaterialConstant>>();
+	if (pixelconstbuffer)
+	{
+		pixelconstbuffer->Update(gfx, matConst);
+	}
+}
+
+
