@@ -98,6 +98,17 @@ void Box::SpawnBoxControllWindow(Graphics& gfx)
 		auto sid = ImGui::SliderFloat("Specular Intensity", &matConst.specularInten, 0.0f, 1.5f);
 		auto spd = ImGui::SliderFloat("Specular Power", &matConst.specularPower, 0.0f, 50.0f, "%.1f");
 		dirty = cd || sid || spd;
+
+		ImGui::Text("Position");
+		ImGui::SliderFloat("R", &r, 0.1f, 50.0f);
+		ImGui::SliderFloat("xRot", &xRot, -90.0f, 90.0f);
+		ImGui::SliderFloat("yRot", &yRot, -90.0f, 90.0f);
+		ImGui::SliderFloat("zRot", &zRot, -90.0f, 90.0f);
+
+		ImGui::SliderFloat("theta", &theta, -90.0f, 90.0f);
+		ImGui::SliderFloat("phi", &phi, -90.0f, 90.0f);
+		ImGui::SliderFloat("chi", &chi, -90.0f, 90.0f);
+
 	}
 	ImGui::End();
 	if (dirty)
