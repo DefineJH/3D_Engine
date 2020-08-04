@@ -3,6 +3,7 @@
 #include "Box.h"
 #include "Cylinder.h"
 #include "SkinnedBox.h"
+#include "Tank.h"
 #include "Pyramid.h"
 #include <optional>
 #include <sstream>
@@ -14,7 +15,6 @@
 #include "ImGUI/imgui.h"
 #include "ImGUI/imgui_impl_dx11.h"
 #include "ImGUI/imgui_impl_win32.h"
-
 GDIPlusManager gdimanager;
 
 App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
@@ -52,6 +52,10 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 					gfx, rng, adist, ddist,
 					odist, rdist
 					);
+			case 4:
+				return std::make_unique<Tank>
+					(gfx, rng, adist, ddist,
+						odist, rdist, bdist, mat);
 			default:
 				assert(false && "impossible drawable option in factory");
 				return {};
@@ -80,7 +84,7 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 	private:
 		Graphics& gfx;
 		std::mt19937 rng{ std::random_device{}() };
-		std::uniform_int_distribution<int> sdist{ 0,3 };
+		std::uniform_int_distribution<int> sdist{ 0,4 };
 		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
 		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
 		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
@@ -105,7 +109,7 @@ App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 			boxes.push_back(boxptr);
 		}
 	}
-
+	
 	wnd.GetGraphics().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 1000.0f));
 }
 App::~App()
