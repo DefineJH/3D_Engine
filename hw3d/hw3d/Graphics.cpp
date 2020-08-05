@@ -18,6 +18,21 @@ namespace dx = DirectX;
 
 Graphics::Graphics(HWND hWnd)
 {
+	HRESULT hr;
+
+	IDXGIFactory * pFactory = NULL;
+	GFX_THROW_INFO(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory));
+
+	std::vector<IDXGIAdapter*> adapters;
+
+	IDXGIAdapter* pAdapter = nullptr;
+	for (UINT i = 0;
+		pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND;
+		++i)
+	{
+		adapters.push_back(pAdapter);
+	}
+	
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	//hWnd를 보고 알아서 알아보라는 뜻
 	sd.BufferDesc.Width = 0;
@@ -38,7 +53,6 @@ Graphics::Graphics(HWND hWnd)
 	sd.Windowed = TRUE;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	sd.Flags = 0;
-
 	UINT swapCreateFlags = 0u;
 #ifndef NDEBUG
 	swapCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;

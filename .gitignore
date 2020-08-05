@@ -371,5 +371,6 @@ FodyWeavers.xsd
 #shader cso file
 *.cso
 
+#for Assimp import
 !zlibd.ilk
 !zlibd.pdb
