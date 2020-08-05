@@ -370,3 +370,6 @@ FodyWeavers.xsd
 
 #shader cso file
 *.cso
+
+!zlibd.ilk
+!zlibd.pdb
