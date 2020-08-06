@@ -16,6 +16,25 @@ namespace dx = DirectX;
 //cso파일 로딩위해서
 #pragma comment(lib, "D3DCompiler.lib")
 
+//dxgi 라이브러리 로딩
+#pragma comment(lib, "dxgi.lib")
+
+int DisplayConfirmSaveAsMessageBox(HWND &hWnd, wchar_t* CardDesc)
+{
+	int msgboxID = MessageBoxW(
+		hWnd,
+		CardDesc,
+		L"Confirm Save As",
+		MB_ICONEXCLAMATION | MB_YESNO
+	);
+
+	if (msgboxID == IDYES)
+	{
+		return 1;
+	}
+
+	return 0;
+}
 Graphics::Graphics(HWND hWnd)
 {
 	HRESULT hr;
@@ -32,7 +51,16 @@ Graphics::Graphics(HWND hWnd)
 	{
 		adapters.push_back(pAdapter);
 	}
-	
+
+	for (int j = 0; j < adapters.size(); j++)
+	{
+		DXGI_ADAPTER_DESC AdapterDesc;
+		adapters[j]->GetDesc(&AdapterDesc);
+		if (DisplayConfirmSaveAsMessageBox(hWnd, AdapterDesc.Description))
+		{
+			pAdapter = adapters[j];
+		}
+	}
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	//hWnd를 보고 알아서 알아보라는 뜻
 	sd.BufferDesc.Width = 0;
@@ -57,7 +85,7 @@ Graphics::Graphics(HWND hWnd)
 #ifndef NDEBUG
 	swapCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-	HRESULT hr;
+	//HRESULT hr;
 
 	//device & swapchain생성
 	GFX_THROW_INFO(D3D11CreateDeviceAndSwapChain(
