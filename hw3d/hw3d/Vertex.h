@@ -106,6 +106,10 @@ public:
 	{
 		return elements.empty() ? 0u : elements.back.GetOffsetAfter();
 	}
+	size_t GetElementCount() const noexcept
+	{
+		return elements.size();	
+	}
 private:
 	std::vector<Element> elements;
 };
@@ -117,7 +121,9 @@ class Vertex
 public:
 	Vertex(char* pData, VertexLayout& layout)
 		:
-		pData(pData), layout(layout) {}
+		pData(pData), layout(layout) {
+		assert(pData != nullptr);
+	}
 	template<VertexLayout::ElementType Type>
 	//접근하고 싶은 elemtype지정하는템플릿 
 	auto& Attr() noexcept(!IS_DEBUG)
@@ -209,6 +215,21 @@ private:
 	const VertexLayout& layout;
 };
 
+//read-only vertex
+class ConstVertex
+{
+public:
+	ConstVertex(const Vertex& v) noexcept(!IS_DEBUG)
+		: v(v)
+	{}
+	template<VertexLayout::ElementType Type>
+	const auto& Attr() const noexcept(!IS_DEBUG)
+	{
+		return const_cast<Vertex&>(v).Attr<Type>();
+	}
+private:
+	Vertex v;
+};
 //실제 데이터를 담을 수 있는 클래스
 class VertexBuffer
 {
@@ -229,9 +250,23 @@ public:
 	//param에 2개 이상의 파라미터가 들어가지 않으면 쪼개지지 않는다
 	void EmplaceBack(Params&&... params) noexcept(!IS_DEBUG)
 	{
+		assert(sizeof...(params) == layout.GetElementCount() && "Param Count Doesnt match with Layout");
 		buffer.resize(buffer.size() + layout.Size());
 		Back().SetAttributeByIndex(0u, std::forward<Params>(params)...)
 		
+	}
+
+	ConstVertex Back() const noexcept(!IS_DEBUG)
+	{
+		return const_cast<VertexBuffer*>(this)->Back();
+	}
+	ConstVertex Front() const noexcept(!IS_DEBUG)
+	{
+		return const_cast<VertexBuffer*>(this)->Front();
+	}
+	ConstVertex operator[](size_t i) const noexcept(!IS_DEBUG)
+	{
+		return const_cast<VertexBuffer*>(this)->operator[](i);
 	}
 	Vertex Back() noexcept(!IS_DEBUG)
 	{
