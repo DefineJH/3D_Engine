@@ -1,5 +1,6 @@
 #include "Tank.h"
 #include "BindableBase.h"
+#include "Vertex.h"
 #include <Importer.hpp>
 #include <scene.h>
 #include <postprocess.h>
@@ -24,20 +25,22 @@ Tank::Tank(Graphics& gfx, std::mt19937& rng,
 			return;
 		}
 
-		struct Vertex
-		{
-			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT3 n;
-		};
-		std::vector<Vertex> verts;
+		DynamicVertex::VertexLayout layout;
+		layout.Append(DynamicVertex::VertexLayout::Position3D);
+		layout.Append(DynamicVertex::VertexLayout::Normal);
+		DynamicVertex::VertexBuffer vbuf(std::move(layout));
+
+		
 		std::vector<unsigned short> indicies;
 		
 		for (UINT i = 0; i < model->mNumMeshes; i++)
 		{
 			for (UINT j = 0; j < model->mMeshes[i]->mNumVertices; j++)
 			{
-				verts.push_back({ { model->mMeshes[i]->mVertices[j].x ,model->mMeshes[i]->mVertices[j].y, model->mMeshes[i]->mVertices[j].z} ,
-					*reinterpret_cast<DirectX::XMFLOAT3*>(&model->mMeshes[i]->mNormals[j]) });
+				
+				vbuf.EmplaceBack(
+					DirectX::XMFLOAT3{ model->mMeshes[i]->mVertices[j].x , model->mMeshes[i]->mVertices[j].y , model->mMeshes[i]->mVertices[j].z },
+					*reinterpret_cast<DirectX::XMFLOAT3*>(&model->mMeshes[i]->mNormals[j]));
 			}
 			for (UINT k = 0; k < model->mMeshes[i]->mNumFaces; k++)
 			{
@@ -49,7 +52,7 @@ Tank::Tank(Graphics& gfx, std::mt19937& rng,
 		}
 
 		AddStaticBind(std::make_unique<Topology>(gfx));
-		AddStaticBind(std::make_unique<VertexBuffer>(gfx, verts));
+		AddStaticBind(std::make_unique<VertexBuffer>(gfx, vbuf));
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(gfx, indicies));
 
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
@@ -61,7 +64,7 @@ Tank::Tank(Graphics& gfx, std::mt19937& rng,
 		auto pvs = std::make_unique<VertexShader>(gfx, L"PhongVS.cso");
 		auto bc = pvs->GetBytecode();
 
-		AddStaticBind(std::make_unique<InputLayout>(gfx, ied, bc));
+		AddStaticBind(std::make_unique<InputLayout>(gfx, vbuf.GetLayout().GetD3DLayout(), bc));
 		AddStaticBind(std::move(pvs));
 		AddStaticBind(std::make_unique<PixelShader>(gfx, L"PhongPS.cso"));
 	}
