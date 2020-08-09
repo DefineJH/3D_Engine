@@ -16,7 +16,7 @@ public:
 	//transform constant buffer에게 넘겨주기 위한 오브젝트의 월드공간의 좌표
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
 	void Draw(Graphics& gfx) const noexcept(!IS_DEBUG);
-	virtual void Update(float dt) noexcept = 0;
+	virtual void Update(float dt) noexcept {};
 protected:
 	template<typename T>
 	T* QueryBindable() noexcept
