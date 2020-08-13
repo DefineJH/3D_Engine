@@ -3,7 +3,6 @@
 #include "Box.h"
 #include "Cylinder.h"
 #include "SkinnedBox.h"
-#include "Tank.h"
 #include "Pyramid.h"
 #include <optional>
 #include <sstream>
