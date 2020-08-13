@@ -374,3 +374,6 @@ FodyWeavers.xsd
 #for Assimp import
 !hw3d/Dependency/Assimp/Libs/*.*
 !hw3d/Dependency/Assimp/Includes/*.*
+
+#for models
+!hw3d/hw3d/Models/*.*
