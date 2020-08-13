@@ -165,6 +165,9 @@
     <ClCompile Include="Cylinder.cpp">
       <Filter>소스 파일\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -338,7 +341,7 @@
     <ClInclude Include="Vertex.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Mesh.h">
       <Filter>헤더 파일\Drawable</Filter>
     </ClInclude>
   </ItemGroup>

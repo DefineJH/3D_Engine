@@ -43,10 +43,8 @@ void App::DoFrame()
 	wnd.GetGraphics().SetCamera(cam.GetMatrix());
 	//pixel cb register0
 	Light.Bind(wnd.GetGraphics(), wnd.GetGraphics().GetCamera());
-	const DirectX::XMMATRIX transform = DirectX::XMMatrixRotationRollPitchYaw(pos.pitch, pos.yaw, pos.roll) *
-		DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 	//pixel cb register1
-	nano.Draw(wnd.GetGraphics(), transform);
+	nano.Draw(wnd.GetGraphics());
 
 	Light.Draw(wnd.GetGraphics());
 
@@ -59,27 +57,14 @@ void App::DoFrame()
 	}
 	ImGui::End();
 
-
+	nano.ShowWindow("Nano");
 	cam.SpawnControlWindow();
 	Light.SpawnControlWindow();
-	SpawnWindow();
 #endif
 	wnd.GetGraphics().EndFrame();
 }
 
 void App::SpawnWindow()
 {
-	if(ImGui::Begin("Model"))
-	{
-		ImGui::Text("Rotation");
-		ImGui::SliderAngle("Roll",&pos.roll,-180.0f,180.0f);
-		ImGui::SliderAngle("Pitch", &pos.pitch, -180.0f, 180.0f);
-		ImGui::SliderAngle("Yaw", &pos.yaw, -180.0f, 180.0f);
 
-		ImGui::Text("Translation");
-		ImGui::SliderFloat("X", &pos.x , -20.0f , 20.0f);
-		ImGui::SliderFloat("Y", &pos.y, -20.0f, 20.0f);
-		ImGui::SliderFloat("Z", &pos.z, -20.0f, 20.0f);
-	}
-	ImGui::End();
 }

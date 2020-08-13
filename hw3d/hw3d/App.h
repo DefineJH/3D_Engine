@@ -3,7 +3,7 @@
 #include "ImguiManager.h"
 #include "Timer.h"
 #include "Camera.h"
-#include "Model.h"
+#include "Mesh.h"
 #include "PointLight.h"
 #include <set>
 #include <optional>
@@ -27,13 +27,4 @@ private:
 	Model nano{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
 	float speedFactors = 1.0f;
 private:
-	struct
-	{
-		float roll = 0.0f;
-		float pitch = 0.0f;
-		float yaw = 0.0f;
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-	}pos;
 };
