@@ -372,5 +372,5 @@ FodyWeavers.xsd
 *.cso
 
 #for Assimp import
-!zlibd.ilk
-!zlibd.pdb
+!hw3d/Dependency/Assimp/Libs/*.*
+!hw3d/Dependency/Assimp/Includes/*.*
