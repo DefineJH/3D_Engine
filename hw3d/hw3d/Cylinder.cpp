@@ -29,7 +29,7 @@ Cylinder::Cylinder(Graphics& gfx, std::mt19937& rng,
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(gfx, L"IndexedPhongPS.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(gfx, L"PhongPS.cso"));
 
 
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
@@ -43,16 +43,10 @@ Cylinder::Cylinder(Graphics& gfx, std::mt19937& rng,
 
 		struct PSMaterialConstant
 		{
-			dx::XMFLOAT3A colors[6] = {
-				{1.0f,0.0f,0.0f},
-				{0.0f,1.0f,0.0f},
-				{0.0f,0.0f,1.0f},
-				{1.0f,1.0f,0.0f},
-				{1.0f,0.0f,1.0f},
-				{0.0f,1.0f,1.0f},
-			};
+			dx::XMFLOAT3A color = { 1.0f,1.0f,1.0f };
 			float specularIntensity = 0.6f;
 			float specularPower = 30.0f;
+			float padding[2];
 		} matConst;
 		AddStaticBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, matConst, 1u));
 	}

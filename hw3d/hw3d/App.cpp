@@ -1,15 +1,11 @@
 #pragma once
 #include "App.h"
 #include "Box.h"
-#include "Cylinder.h"
-#include "SkinnedBox.h"
-#include "Pyramid.h"
 #include <optional>
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
 #include "JHMath.h"
-#include "Surface.h"
 #include "GDIPlusManager.h"
 #include "ImGUI/imgui.h"
 #include "ImGUI/imgui_impl_dx11.h"
