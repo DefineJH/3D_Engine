@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "ImGUI/imgui.h"
+#include <unordered_map>
 
 class ModelWindow
 {
@@ -11,30 +12,39 @@ public:
 		if (ImGui::Begin(WindowName))
 		{
 			ImGui::Columns(2, nullptr, true);
-			root.ShowTree(nodeIndex , selectedIndex);
+			root.ShowTree(nodeIndex , selectedIndex , pSelectedNode);
 
 			ImGui::NextColumn();
-			ImGui::Text("Rotation");
-			ImGui::SliderAngle("Roll", &pos.roll, -180.0f, 180.0f);
-			ImGui::SliderAngle("Pitch", &pos.pitch, -180.0f, 180.0f);
-			ImGui::SliderAngle("Yaw", &pos.yaw, -180.0f, 180.0f);
+			if (pSelectedNode != nullptr)
+			{
+				auto& pos = transforms[*selectedIndex];
+				ImGui::Text("Rotation");
+				ImGui::SliderAngle("Roll", &pos.roll, -180.0f, 180.0f);
+				ImGui::SliderAngle("Pitch", &pos.pitch, -180.0f, 180.0f);
+				ImGui::SliderAngle("Yaw", &pos.yaw, -180.0f, 180.0f);
 
-			ImGui::Text("Translation");
-			ImGui::SliderFloat("X", &pos.x, -20.0f, 20.0f);
-			ImGui::SliderFloat("Y", &pos.y, -20.0f, 20.0f);
-			ImGui::SliderFloat("Z", &pos.z, -20.0f, 20.0f);
+				ImGui::Text("Translation");
+				ImGui::SliderFloat("X", &pos.x, -20.0f, 20.0f);
+				ImGui::SliderFloat("Y", &pos.y, -20.0f, 20.0f);
+				ImGui::SliderFloat("Z", &pos.z, -20.0f, 20.0f);
+
+			}
 		}
 		ImGui::End();
 	}
+	Node* GetSelectedNode() const noexcept {
+		return pSelectedNode;
+	}
 	DirectX::XMMATRIX GetTransform() const noexcept
 	{
-		auto transform = DirectX::XMMatrixRotationRollPitchYaw(pos.pitch, pos.yaw, pos.roll) *
-			DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-		return transform;
+		const auto& transform = transforms.at(*selectedIndex);
+		return DirectX::XMMatrixRotationRollPitchYaw(transform.pitch, transform.yaw, transform.roll) *
+			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 private:
 	std::optional<int> selectedIndex;
-	struct
+	Node* pSelectedNode;
+	struct STransform
 	{
 		float roll = 0.0f;
 		float pitch = 0.0f;
@@ -42,18 +52,19 @@ private:
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;
-	}pos;
+	};
+	std::unordered_map<int, STransform> transforms;
 };
 
 Model::Model(Graphics& gfx, const std::string fileName)
 {
 	Assimp::Importer imp;
 	const aiScene* pScene = imp.ReadFile(fileName.c_str(),
-		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices
+		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals
 	);
 	if (!pScene)
 	{
-		assert("Cannot Import Models" && false);
+		throw ModelException(__LINE__, __FILE__, imp.GetErrorString());
 	}
 
 	for (size_t i = 0; i < pScene->mNumMeshes; i++)
@@ -152,7 +163,11 @@ void Model::ShowWindow(const char* WindowName) noexcept
 
 void Model::Draw(Graphics& gfx) const
 {
-	pRoot->Draw(gfx, pModelWindow->GetTransform());
+	if (auto node = pModelWindow->GetSelectedNode())
+	{
+		node->SetAppliedTransform(pModelWindow->GetTransform());
+	}
+	pRoot->Draw(gfx, DirectX::XMMatrixIdentity());
 }
 
 Node::Node(const std::string & Name, std::vector<Mesh*> MeshPtrs, const DirectX::XMMATRIX & transform) noexcept
@@ -161,22 +176,31 @@ Node::Node(const std::string & Name, std::vector<Mesh*> MeshPtrs, const DirectX:
 	meshPtrs(std::move(MeshPtrs))
 {
 	DirectX::XMStoreFloat4x4(&(*this).transform, transform);
+	DirectX::XMStoreFloat4x4(&(*this).appliedTransform, DirectX::XMMatrixIdentity());
 }
 
 void Node::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept(!IS_DEBUG)
 {
-	const auto CurNodeTr = DirectX::XMLoadFloat4x4(&transform) * accumulatedTransform;
+	//applied tr = ui서 바꿔준 transform
+	//transform = node가 가지고 있는 로컬좌표
+	//accumulatedTr = 상위노드서 계산되면서 내려온 월드좌표
+	const auto CurNodeWorldTr = DirectX::XMLoadFloat4x4(&appliedTransform) * DirectX::XMLoadFloat4x4(&transform) *accumulatedTransform;
 	for (Mesh* mesh : meshPtrs)
 	{
-		mesh->Draw(gfx, CurNodeTr);
+		mesh->Draw(gfx, CurNodeWorldTr);
 	}
 	for (const std::unique_ptr<Node>& childnode : childs)
 	{
-		childnode->Draw(gfx, CurNodeTr);
+		childnode->Draw(gfx, CurNodeWorldTr);
 	}
 }
 
-void Node::ShowTree(int& nodeIndex, std::optional<int>& selectedIndex) const noexcept
+void Node::SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept
+{
+	DirectX::XMStoreFloat4x4(&appliedTransform, transform);
+}
+
+void Node::ShowTree(int& nodeIndex, std::optional<int>& selectedIndex, Node*& pSelectedNode) const noexcept
 {
 	//현재 노드의 인덱스를 저장
 	int curNodeIndex = nodeIndex;
@@ -187,12 +211,17 @@ void Node::ShowTree(int& nodeIndex, std::optional<int>& selectedIndex) const noe
 		| ((curNodeIndex == selectedIndex.value_or(-1)) ? ImGuiTreeNodeFlags_Selected : 0) //현재 노드의 인덱스가 selectedIndex와 같을때, -1은 아무것도 선택 x 선택플래그
 		| ((childs.empty()) ? ImGuiTreeNodeFlags_Leaf : 0); //현재 노드의 자식이 없을 때 Leaf노드로 설정하는 플래그
 	//void* intptr_t
-	if (ImGui::TreeNodeEx(reinterpret_cast<void*>(&curNodeIndex),flag,name.c_str()))
+	const auto expanded = ImGui::TreeNodeEx(reinterpret_cast<void*>(&curNodeIndex), flag, name.c_str());
+	if (ImGui::IsItemClicked())
 	{
-		selectedIndex = ImGui::IsItemClicked() ? curNodeIndex : selectedIndex;
+		selectedIndex = curNodeIndex;
+		pSelectedNode = const_cast<Node*>(this);
+	}
+	if (expanded)
+	{
 		for (const auto& pChild : childs)
 		{
-			pChild->ShowTree(nodeIndex,selectedIndex);
+			pChild->ShowTree(nodeIndex, selectedIndex, pSelectedNode);
 		}
 		ImGui::TreePop();
 	}
@@ -236,4 +265,24 @@ void Mesh::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const no
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept
 {
 	return DirectX::XMLoadFloat4x4(&transform);
+}
+
+ModelException::ModelException(int line, const char* file, std::string note) noexcept
+	: JHException(line, file) , note(note)
+{
+}
+
+const char* ModelException::what() const noexcept
+{
+	return note.c_str();
+}
+
+const char* ModelException::GetType() const noexcept
+{
+	return "Assimp Exception";
+}
+
+const std::string& ModelException::GetNote() const noexcept
+{
+	return note;
 }

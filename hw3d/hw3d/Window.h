@@ -57,6 +57,8 @@ public:
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
 	void SetTitle(const std::string title);
+	int GetWidth() const noexcept { return width; }
+	int GetHeight() const noexcept { return height; }
 	//모든 윈도우 객체에서 같은 메서드 사용
 	static std::optional<int> ProcessMessages();
 	Graphics& GetGraphics();

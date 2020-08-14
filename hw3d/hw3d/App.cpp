@@ -14,7 +14,7 @@ GDIPlusManager gdimanager;
 
 App::App() : wnd(1280,720,"JH's Direct3D"), Light(wnd.GetGraphics())
 {
-	wnd.GetGraphics().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 1000.0f));
+	wnd.GetGraphics().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, static_cast<float>(wnd.GetHeight()) / wnd.GetWidth(), 0.5f, 1000.0f));
 }
 App::~App()
 {}

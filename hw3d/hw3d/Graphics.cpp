@@ -35,7 +35,7 @@ int DisplayConfirmSaveAsMessageBox(HWND &hWnd, wchar_t* CardDesc)
 
 	return 0;
 }
-Graphics::Graphics(HWND hWnd)
+Graphics::Graphics(HWND hWnd, int width , int height)
 {
 	HRESULT hr;
 
@@ -63,8 +63,8 @@ Graphics::Graphics(HWND hWnd)
 	}
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	//hWnd를 보고 알아서 알아보라는 뜻
-	sd.BufferDesc.Width = 0;
-	sd.BufferDesc.Height = 0;
+	sd.BufferDesc.Width = width;
+	sd.BufferDesc.Height = height;
 	sd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	sd.BufferDesc.RefreshRate.Numerator = 0;
 	sd.BufferDesc.RefreshRate.Denominator = 0;
@@ -121,8 +121,8 @@ Graphics::Graphics(HWND hWnd)
 
 	wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC depthDesc = {};
-	depthDesc.Width = 1280u;
-	depthDesc.Height = 720u;
+	depthDesc.Width = (UINT)width;
+	depthDesc.Height = (UINT)height;
 	depthDesc.MipLevels = 1u;
 	depthDesc.ArraySize = 1u;
 	depthDesc.Format = DXGI_FORMAT_D32_FLOAT;
@@ -144,8 +144,8 @@ Graphics::Graphics(HWND hWnd)
 
 	//뷰포트 설정
 	D3D11_VIEWPORT vp;
-	vp.Width = 1280.0f;
-	vp.Height = 720.0f;
+	vp.Width = static_cast<float>(width);
+	vp.Height = static_cast<float>(height);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0.0f;

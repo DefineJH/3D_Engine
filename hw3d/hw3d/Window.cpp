@@ -73,7 +73,7 @@ Window::Window(int width, int height, const char * name)
 	ImGui_ImplWin32_Init(hWnd);
 
 	//객체로 Graphic를 가질시 초기화할 수 없기 때문에(hWnd가 없기 때문에) Unique_ptr로 가지고 있어서 초기화시점을 늦춘다
-	pGfx = std::make_unique<Graphics>(hWnd);
+	pGfx = std::make_unique<Graphics>(hWnd,width, height);
 }
 
 Window::~Window()
