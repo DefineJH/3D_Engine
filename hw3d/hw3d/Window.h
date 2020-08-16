@@ -59,10 +59,20 @@ public:
 	void SetTitle(const std::string title);
 	int GetWidth() const noexcept { return width; }
 	int GetHeight() const noexcept { return height; }
+	void EnableCursor() noexcept;
+	void DisableCursor() noexcept;
 	//모든 윈도우 객체에서 같은 메서드 사용
 	static std::optional<int> ProcessMessages();
 	Graphics& GetGraphics();
 private:
+	void HideCursor() noexcept;
+	void ShowCursor() noexcept;
+	//모니터의 좌표를 현재 클라이언트 공간에 매핑하여 커서가 윈도우 밖으로 나갈수 없게끔 한정(confine)함
+	void ConfineCursor() noexcept;
+	void FreeCursor() noexcept;
+
+	void DisableUIMouseInteraction() noexcept;
+	void EnableUIMouseInteraction() noexcept;
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	// 멤버함수로 메시지를 처리하기 위해 위 두개의 static 함수를 두고 우회한다.
@@ -74,6 +84,7 @@ private:
 	int height;
 	HWND hWnd;
 	std::unique_ptr<Graphics> pGfx;
+	bool m_CursorEnabled = true;
 public:
 	Keyboard kbd;
 	Mouse mouse;

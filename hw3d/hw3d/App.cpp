@@ -44,6 +44,8 @@ void App::DoFrame()
 
 	Light.Draw(wnd.GetGraphics());
 
+	
+
 #if IS_DEBUG
 	static char buffer[1024];
 	if (ImGui::Begin("Simulation Speed"))

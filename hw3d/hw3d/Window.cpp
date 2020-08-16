@@ -88,6 +88,22 @@ void Window::SetTitle(const std::string title)
 		throw JHWND_LAST_EXCEPT();
 }
 
+void Window::EnableCursor() noexcept
+{
+	m_CursorEnabled = true;
+	ShowCursor();
+	EnableUIMouseInteraction();
+	FreeCursor();
+}
+
+void Window::DisableCursor() noexcept
+{
+	m_CursorEnabled = false;
+	HideCursor();
+	DisableUIMouseInteraction();
+	ConfineCursor();
+}
+
 //optional T로 인해 T를 반환할 수도 있고 비어있는 객체를 반환할 수도 있음.
 std::optional<int> Window::ProcessMessages()
 {
@@ -118,6 +134,42 @@ Graphics& Window::GetGraphics()
 		throw JHWND_NOGFX_EXCEPT();
 	}
 	return *pGfx;
+}
+
+void Window::HideCursor() noexcept
+{
+	//showcursor 함수는 uint값을 가지고 showcursor가 불려질때마다 ++ or --를하여 0일시 커서를 숨기고 1이상일 시 커서를 보여준다
+	while (::ShowCursor(FALSE) >= 0);
+}
+
+void Window::ShowCursor()noexcept
+{
+	while (::ShowCursor(TRUE) < 0);
+}
+
+void Window::ConfineCursor() noexcept
+{
+	RECT rect;
+	GetClientRect(hWnd, &rect);
+	//현재 윈도우의 클라이언트 좌표를 모니터의 스크린 좌표로 변환해준다
+	MapWindowPoints(hWnd, nullptr, reinterpret_cast<POINT*>(&rect), 2);
+	//커서를 rect로 제한할 수 있게끔 함
+	ClipCursor(&rect);
+}
+
+void Window::FreeCursor() noexcept
+{
+	ClipCursor(nullptr);
+}
+
+void Window::DisableUIMouseInteraction() noexcept
+{
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_NoMouse;
+}
+
+void Window::EnableUIMouseInteraction() noexcept
+{
+	ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_::ImGuiConfigFlags_NoMouse;
 }
 
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -201,11 +253,22 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 #pragma region MouseEvent
 	case WM_MOUSEMOVE:
 	{
+		POINTS pt = MAKEPOINTS(lParam); 
+		if (!m_CursorEnabled)
+		{
+			if (!mouse.IsInWindow())
+			{
+				SetCapture(hWnd);
+				mouse.OnMouseEnter();
+				HideCursor();
+			}
+			break;
+		}
 		if (ImGui::GetIO().WantCaptureKeyboard)
 		{
 			break;
 		}
-		POINTS pt = MAKEPOINTS(lParam);
+		
 		//클라이언트 영역 안일때
 		if (pt.x >= 0 && pt.x < width && pt.y >= 0 && pt.y < height)
 		{
@@ -239,6 +302,12 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	}
 	case WM_LBUTTONDOWN:
 	{
+		SetForegroundWindow(hWnd);
+		if (!m_CursorEnabled)
+		{
+			HideCursor();
+			ConfineCursor();
+		}
 		if (ImGui::GetIO().WantCaptureKeyboard)
 		{
 			break;
@@ -289,6 +358,21 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		break;
 	}
 #pragma endregion
+	case WM_ACTIVATE:
+		if (!m_CursorEnabled)
+		{
+			if (wParam & WA_ACTIVE)
+			{
+				ConfineCursor();
+				HideCursor();
+			}
+			else
+			{
+				FreeCursor();
+				ShowCursor();
+			}
+		}
+		break;
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		// defwindowproc으로 가지 않는다, DestoryWindow를 두번 부르기 때문에 그냥 소멸자에서 처리함
