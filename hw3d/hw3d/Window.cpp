@@ -4,6 +4,7 @@
 #include <sstream>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <WinUser.h>
 //싱글턴 스태틱 클래스 선언
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -68,12 +69,26 @@ Window::Window(int width, int height, const char * name)
 	{
 		throw JHWND_LAST_EXCEPT();
 	}
+
+
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 
 	ImGui_ImplWin32_Init(hWnd);
-
 	//객체로 Graphic를 가질시 초기화할 수 없기 때문에(hWnd가 없기 때문에) Unique_ptr로 가지고 있어서 초기화시점을 늦춘다
-	pGfx = std::make_unique<Graphics>(hWnd,width, height);
+	pGfx = std::make_unique<Graphics>(hWnd, width, height);
+
+
+	//raw mouse 등록
+	RAWINPUTDEVICE rid;
+	rid.usUsagePage = 0x01;
+	rid.usUsage = 0x02;
+	rid.dwFlags = 0;
+	rid.hwndTarget = nullptr;
+
+	if (RegisterRawInputDevices(&rid, 1,sizeof(rid)) == FALSE) {
+		throw JHWND_LAST_EXCEPT();
+	}
+	
 }
 
 Window::~Window()
@@ -102,6 +117,11 @@ void Window::DisableCursor() noexcept
 	HideCursor();
 	DisableUIMouseInteraction();
 	ConfineCursor();
+}
+
+bool Window::CursorEnabled() const noexcept
+{
+	return m_CursorEnabled;
 }
 
 //optional T로 인해 T를 반환할 수도 있고 비어있는 객체를 반환할 수도 있음.
@@ -187,6 +207,54 @@ LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+INT_PTR CALLBACK Window::MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	switch (iMessage)
+	{
+	case WM_INITDIALOG:
+		//desc = GetGraphics().GetGraphicCard();
+		for (UINT i = 0; i < desc.size(); i++)
+		{
+			SendMessage(hDlg, CB_ADDSTRING, 0, (LPARAM)desc.at(i).c_str());
+		}
+		break;
+	case WM_COMMAND:
+		switch (wParam)
+		{
+		case IDOK:
+			EndDialog(hDlg, 1);
+			break;
+		default:
+			break;
+		}
+	default:
+		break;
+	}
+	return DefWindowProc(hDlg, iMessage, wParam, lParam);
+}
+
+
+INT_PTR CALLBACK Window::HandleDlgProcSetup(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	if (iMessage == WM_INITDIALOG)
+	{
+		Window* const pWnd = reinterpret_cast<Window*>(lParam);
+		//pWnd , HandleMsgThunk 를 hWnd를 매개변수로 window측에 저장 GWLP_USERDATA , GWLP_WNDPROC으로 불러올 수 있음
+		SetWindowLongPtr(hDlg, DWLP_USER, reinterpret_cast<LONG_PTR>(pWnd));
+		SetWindowLongPtr(hDlg, DWLP_DLGPROC, reinterpret_cast<LONG_PTR>(&Window::HandleDlgProcThunk));
+		return pWnd->MainDlgProc(hDlg, iMessage, wParam, lParam);
+	}
+	return DefWindowProc(hDlg, iMessage, wParam, lParam);
+}
+
+INT_PTR CALLBACK Window::HandleDlgProcThunk(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	//window측에 저장한 window포인터를 받아와서 멤버함수인 HandleMsg호출!
+	Window* const pWnd = reinterpret_cast<Window*>(GetWindowLongPtr(hDlg, DWLP_USER));
+	return pWnd->MainDlgProc(hDlg, iMessage, wParam, lParam);
+}
+
+
 LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	//window측에 저장한 window포인터를 받아와서 멤버함수인 HandleMsg호출!
@@ -201,6 +269,10 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 
 	switch (msg)
 	{
+	case WM_CREATE:
+		DialogBoxParamA(nullptr, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, HandleDlgProcSetup, (LPARAM)this);
+		break;
+
 		//focus를 잃었을 때 키를 초기화시키지 않으면 계속 그 상태에 머무른다
 	case WM_KILLFOCUS:
 		kbd.ClearState();
@@ -356,6 +428,41 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 		mouse.OnWheelDelta(pt.x, pt.y, delta);
 		break;
+	}
+	case WM_INPUT:
+	{
+		if (!mouse.RawEnabled())
+		{
+			break;
+		}
+		UINT size;
+		if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			nullptr,
+			&size,
+			sizeof(RAWINPUTHEADER)) == -1)
+		{
+			break;
+		}
+
+		rawBuffer.resize(size);
+		if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			rawBuffer.data(),
+			&size,
+			sizeof(RAWINPUTHEADER)) == size)
+		{
+			break;
+		}
+
+		RAWINPUT rawVal = reinterpret_cast<const RAWINPUT&>(*rawBuffer.data());
+		if (rawVal.header.dwType == RIM_TYPEMOUSE &&
+			rawVal.data.mouse.lLastX != 0 || rawVal.data.mouse.lLastY != 0)
+		{
+			mouse.OnRawDelta(rawVal.data.mouse.lLastX, rawVal.data.mouse.lLastY);
+		}
+		break;
+		
 	}
 #pragma endregion
 	case WM_ACTIVATE:

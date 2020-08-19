@@ -8,6 +8,7 @@
 #include <DirectXMath.h>
 #include <memory>
 #include <random>
+#include <string.h>
 
 
 class Graphics
@@ -64,6 +65,7 @@ public:
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
 
+	std::vector<std::wstring> GetGraphicCard();
 
 	void EnableImGui() noexcept;
 	void DisableImGui() noexcept;

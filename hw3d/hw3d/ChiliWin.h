@@ -19,7 +19,7 @@
 #define NOATOM
 #define NOCLIPBOARD
 #define NOCOLOR
-#define NOCTLMGR
+//#define NOCTLMGR 다이얼로그박스
 #define NODRAWTEXT
 #define NOKERNEL
 #define NONLS
@@ -44,5 +44,4 @@
 #endif
 #define NOMINMAX
 #define STRICT
-
 #include <Windows.h>

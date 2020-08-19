@@ -7,6 +7,8 @@
 #include "ImGUI/imgui_impl_win32.h"
 #include <optional>
 #include <memory>
+#include <string.h>
+#include <vector>
 
 
 class Window
@@ -61,6 +63,7 @@ public:
 	int GetHeight() const noexcept { return height; }
 	void EnableCursor() noexcept;
 	void DisableCursor() noexcept;
+	bool CursorEnabled() const noexcept;
 	//모든 윈도우 객체에서 같은 메서드 사용
 	static std::optional<int> ProcessMessages();
 	Graphics& GetGraphics();
@@ -79,12 +82,19 @@ private:
 	// 왜냐하면 기본적으로 멤버함수는 객체의 포인터를 숨겨진 매개변수로 받는데, 윈도우 사이드는 이를 모르기 때문에
 	// 객체에 상대적이지 않은 static 함수를 이용하여 우회한다
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+	static INT_PTR CALLBACK HandleDlgProcSetup(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	static INT_PTR CALLBACK HandleDlgProcThunk(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	INT_PTR CALLBACK MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
+
+	static void SetGraphicCard(int idx) noexcept;
 private:
 	int width;
 	int height;
 	HWND hWnd;
 	std::unique_ptr<Graphics> pGfx;
+	std::vector<char> rawBuffer;
 	bool m_CursorEnabled = true;
+	std::vector<std::wstring> desc;
 public:
 	Keyboard kbd;
 	Mouse mouse;

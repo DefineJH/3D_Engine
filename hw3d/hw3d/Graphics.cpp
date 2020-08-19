@@ -211,6 +211,32 @@ DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 	return projectionMat;
 }
 
+std::vector<std::wstring> Graphics::GetGraphicCard()
+{
+	HRESULT hr;
+
+	IDXGIFactory * pFactory = NULL;
+	GFX_THROW_INFO(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory));
+
+	std::vector<IDXGIAdapter*> adapters;
+	std::vector<std::wstring> descVec;
+	IDXGIAdapter* pAdapter = nullptr;
+	for (UINT i = 0;
+		pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND;
+		++i)
+	{
+		adapters.push_back(pAdapter);
+	}
+
+	for (int j = 0; j < adapters.size(); j++)
+	{
+		DXGI_ADAPTER_DESC AdapterDesc;
+		adapters[j]->GetDesc(&AdapterDesc);
+		descVec.push_back(AdapterDesc.Description);
+	}
+	return descVec;
+}
+
 void Graphics::EnableImGui() noexcept
 {
 	imguiEnabled = true;

@@ -43,8 +43,23 @@ void App::DoFrame()
 	nano.Draw(wnd.GetGraphics());
 
 	Light.Draw(wnd.GetGraphics());
-
-	
+	while (!wnd.kbd.KeyIsEmpty())
+	{
+		const auto e = wnd.kbd.ReadKey();
+		if (e.IsPress() && e.GetCode() == VK_INSERT)
+		{
+			if (wnd.CursorEnabled())
+			{
+				wnd.DisableCursor();
+				wnd.mouse.EnableRaw();
+			}
+			else
+			{
+				wnd.EnableCursor();
+				wnd.mouse.DisableRaw();
+			}
+		}
+	}
 
 #if IS_DEBUG
 	static char buffer[1024];
@@ -58,11 +73,16 @@ void App::DoFrame()
 	nano.ShowWindow("Nano");
 	cam.SpawnControlWindow();
 	Light.SpawnControlWindow();
+	SpawnWindow();
 #endif
 	wnd.GetGraphics().EndFrame();
 }
 
 void App::SpawnWindow()
 {
-
+	if(ImGui::Begin("Debugging"))
+	{
+		ImGui::Text("Cursor %s", wnd.CursorEnabled() ? "enabled" : "Disabled");
+	}
+	ImGui::End();
 }
