@@ -56,7 +56,7 @@ public:
 		std::string reason;
 	};
 public:
-	Graphics(HWND hWnd, int width, int height);
+	Graphics(HWND hWnd, int width, int height, IDXGIAdapter* pAdapter = nullptr);
 	Graphics(const Graphics&) = delete;
 	Graphics& operator=(const Graphics&) = delete;
 	void EndFrame();
@@ -65,7 +65,6 @@ public:
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
 
-	std::vector<std::wstring> GetGraphicCard();
 
 	void EnableImGui() noexcept;
 	void DisableImGui() noexcept;
@@ -84,7 +83,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSView;
-	IDXGIAdapter* pAdapter = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
 private:
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;

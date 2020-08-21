@@ -167,6 +167,7 @@
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="GDIPlusManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Graphicsinfra.cpp" />
     <ClCompile Include="ImguiManager.cpp" />
     <ClCompile Include="ImGUI\imgui.cpp" />
     <ClCompile Include="ImGUI\imgui_demo.cpp" />
@@ -266,6 +267,7 @@
     <None Include="DXGetErrorDescription.inl" />
     <None Include="DXGetErrorString.inl" />
     <None Include="DXTrace.inl" />
+    <None Include="resource.hm" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PhongPS.hlsl">

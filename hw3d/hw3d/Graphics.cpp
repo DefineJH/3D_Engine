@@ -35,32 +35,16 @@ int DisplayConfirmSaveAsMessageBox(HWND &hWnd, wchar_t* CardDesc)
 
 	return 0;
 }
-Graphics::Graphics(HWND hWnd, int width , int height)
+Graphics::Graphics(HWND hWnd, int width , int height, IDXGIAdapter* pAdapter)
 {
 	HRESULT hr;
 
-	IDXGIFactory * pFactory = NULL;
-	GFX_THROW_INFO(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory));
+	//DXGI_ADAPTER_DESC desc;
+	//pAdapter->GetDesc(&desc);
+	//DisplayConfirmSaveAsMessageBox(hWnd, desc.Description);
 
-	std::vector<IDXGIAdapter*> adapters;
+	//(*this).pAdapter = pAdapter;
 
-	IDXGIAdapter* pAdapter = nullptr;
-	for (UINT i = 0;
-		pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND;
-		++i)
-	{
-		adapters.push_back(pAdapter);
-	}
-
-	for (int j = 0; j < adapters.size(); j++)
-	{
-		DXGI_ADAPTER_DESC AdapterDesc;
-		adapters[j]->GetDesc(&AdapterDesc);
-		if (DisplayConfirmSaveAsMessageBox(hWnd, AdapterDesc.Description))
-		{
-			pAdapter = adapters[j];
-		}
-	}
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	//hWnd를 보고 알아서 알아보라는 뜻
 	sd.BufferDesc.Width = width;
@@ -89,8 +73,8 @@ Graphics::Graphics(HWND hWnd, int width , int height)
 
 	//device & swapchain생성
 	GFX_THROW_INFO(D3D11CreateDeviceAndSwapChain(
-		nullptr,
-		D3D_DRIVER_TYPE_HARDWARE,
+		pAdapter,
+		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		swapCreateFlags,
 		nullptr,
@@ -211,31 +195,7 @@ DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 	return projectionMat;
 }
 
-std::vector<std::wstring> Graphics::GetGraphicCard()
-{
-	HRESULT hr;
 
-	IDXGIFactory * pFactory = NULL;
-	GFX_THROW_INFO(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory));
-
-	std::vector<IDXGIAdapter*> adapters;
-	std::vector<std::wstring> descVec;
-	IDXGIAdapter* pAdapter = nullptr;
-	for (UINT i = 0;
-		pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND;
-		++i)
-	{
-		adapters.push_back(pAdapter);
-	}
-
-	for (int j = 0; j < adapters.size(); j++)
-	{
-		DXGI_ADAPTER_DESC AdapterDesc;
-		adapters[j]->GetDesc(&AdapterDesc);
-		descVec.push_back(AdapterDesc.Description);
-	}
-	return descVec;
-}
 
 void Graphics::EnableImGui() noexcept
 {

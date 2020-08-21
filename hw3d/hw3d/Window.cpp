@@ -1,10 +1,13 @@
+#define DIRECTINPUT_VERSION 0x0800
+#define ID_COMBOBOX 100
 #include "Window.h"
 #include "resource.h"
 #include "WindowsThrowMacro.h"
 #include <sstream>
-#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <WinUser.h>
+HWND hComboHandle;
+int SelectIdx = 1;
 //싱글턴 스태틱 클래스 선언
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -49,6 +52,8 @@ Window::WindowClass::~WindowClass()
 Window::Window(int width, int height, const char * name)
 	: width(width),height(height)
 {
+
+	Adapterdesc = Infra.GetGraphicsDesc();
 	RECT wndRect;
 	wndRect.left = 100;
 	wndRect.right = width + wndRect.left;
@@ -74,8 +79,10 @@ Window::Window(int width, int height, const char * name)
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 
 	ImGui_ImplWin32_Init(hWnd);
+
+	
 	//객체로 Graphic를 가질시 초기화할 수 없기 때문에(hWnd가 없기 때문에) Unique_ptr로 가지고 있어서 초기화시점을 늦춘다
-	pGfx = std::make_unique<Graphics>(hWnd, width, height);
+	pGfx = std::make_unique<Graphics>(hWnd, width, height, Infra.SelectByIndex(SelectIdx));
 
 
 	//raw mouse 등록
@@ -207,23 +214,35 @@ LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+
 INT_PTR CALLBACK Window::MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
-		//desc = GetGraphics().GetGraphicCard();
-		for (UINT i = 0; i < desc.size(); i++)
+		hComboHandle = CreateWindowEx(WS_EX_CLIENTEDGE, "Combobox", NULL, WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST, 100, 100, 200, 200, hDlg, (HMENU)ID_COMBOBOX, NULL, NULL);
+		for (UINT i = 0; i < Adapterdesc.size(); i++)
 		{
-			SendMessage(hDlg, CB_ADDSTRING, 0, (LPARAM)desc.at(i).c_str());
+			size_t size;
+			CHAR szString[256];
+			wcstombs_s(&size, szString, _countof(szString), (LPCWSTR)Adapterdesc[i].c_str(), Adapterdesc[i].length());
+			HRESULT hr = SendMessage(hComboHandle, CB_ADDSTRING, i, (LPARAM)szString);
 		}
 		break;
 	case WM_COMMAND:
-		switch (wParam)
+		switch (LOWORD(wParam))
 		{
 		case IDOK:
-			EndDialog(hDlg, 1);
+			EndDialog(hDlg, SelectIdx);
 			break;
+		case ID_COMBOBOX:
+		{
+			switch (HIWORD(wParam)) {
+			case CBN_SELCHANGE:
+				SelectIdx = SendMessage(hComboHandle, CB_GETCURSEL, 0, 0);
+				break;
+			}
+		}
 		default:
 			break;
 		}

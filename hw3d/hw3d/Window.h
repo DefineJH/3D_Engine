@@ -3,6 +3,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "JHException.h"
+#include "GraphicsInfra.h"
 #include "Graphics.h"
 #include "ImGUI/imgui_impl_win32.h"
 #include <optional>
@@ -86,18 +87,19 @@ private:
 	static INT_PTR CALLBACK HandleDlgProcThunk(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	INT_PTR CALLBACK MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-	static void SetGraphicCard(int idx) noexcept;
 private:
 	int width;
 	int height;
 	HWND hWnd;
 	std::unique_ptr<Graphics> pGfx;
+	std::vector<std::wstring> Adapterdesc;
 	std::vector<char> rawBuffer;
 	bool m_CursorEnabled = true;
-	std::vector<std::wstring> desc;
 public:
 	Keyboard kbd;
 	Mouse mouse;
+	GraphicsInfra Infra;
+	
 
 
 };
