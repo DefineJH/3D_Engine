@@ -12,12 +12,12 @@ public:
 		if (ImGui::Begin(WindowName))
 		{
 			ImGui::Columns(2, nullptr, true);
-			root.ShowTree(nodeIndex , selectedIndex , pSelectedNode);
+			root.ShowTree(pSelectedNode);
 
 			ImGui::NextColumn();
 			if (pSelectedNode != nullptr)
 			{
-				auto& pos = transforms[*selectedIndex];
+				auto& pos = transforms[pSelectedNode->GetID()];
 				ImGui::Text("Rotation");
 				ImGui::SliderAngle("Roll", &pos.roll, -180.0f, 180.0f);
 				ImGui::SliderAngle("Pitch", &pos.pitch, -180.0f, 180.0f);
@@ -37,12 +37,12 @@ public:
 	}
 	DirectX::XMMATRIX GetTransform() const noexcept
 	{
-		const auto& transform = transforms.at(*selectedIndex);
+		assert(pSelectedNode != nullptr);
+		const auto& transform = transforms.at(pSelectedNode->GetID());
 		return DirectX::XMMatrixRotationRollPitchYaw(transform.pitch, transform.yaw, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 private:
-	std::optional<int> selectedIndex;
 	Node* pSelectedNode;
 	struct STransform
 	{
@@ -71,7 +71,8 @@ Model::Model(Graphics& gfx, const std::string fileName)
 	{
 		meshPtrs.push_back(ParseMesh(gfx, *pScene->mMeshes[i]));
 	}
-	pRoot = ParseNode(*pScene->mRootNode);
+	int nextId = 0;
+	pRoot = ParseNode(nextId ,*pScene->mRootNode);
 	pModelWindow = std::make_unique<class ModelWindow>();
 
 }
@@ -128,7 +129,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh)
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));
 }
 
-std::unique_ptr<Node> Model::ParseNode(const aiNode& node)
+std::unique_ptr<Node> Model::ParseNode(int& nextId,const aiNode& node)
 {
 	//row major -> column major
 	const auto transform = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(
@@ -146,11 +147,11 @@ std::unique_ptr<Node> Model::ParseNode(const aiNode& node)
 		curMeshPtrs.push_back(meshPtrs.at(meshIdx).get());
 	}
 	//현재 노드 생성
-	auto pNode = std::make_unique<Node>(node.mName.C_Str(),std::move(curMeshPtrs), transform);
+	auto pNode = std::make_unique<Node>(nextId++,node.mName.C_Str(),std::move(curMeshPtrs), transform);
 	//자식 노드 생성을 위해 현재 노드의 자식노드 개수만큼 재귀함수 ㄱㄱ
 	for (size_t i = 0; i < node.mNumChildren; i++)
 	{
-		pNode->AddChild(ParseNode(*node.mChildren[i]));
+		pNode->AddChild(ParseNode(nextId,*node.mChildren[i]));
 	}
 	return pNode;
 }
@@ -170,8 +171,9 @@ void Model::Draw(Graphics& gfx) const
 	pRoot->Draw(gfx, DirectX::XMMatrixIdentity());
 }
 
-Node::Node(const std::string & Name, std::vector<Mesh*> MeshPtrs, const DirectX::XMMATRIX & transform) noexcept
+Node::Node(int id,const std::string & Name, std::vector<Mesh*> MeshPtrs, const DirectX::XMMATRIX & transform) noexcept
 	:
+	id(id),
 	name(Name),
 	meshPtrs(std::move(MeshPtrs))
 {
@@ -200,28 +202,28 @@ void Node::SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept
 	DirectX::XMStoreFloat4x4(&appliedTransform, transform);
 }
 
-void Node::ShowTree(int& nodeIndex, std::optional<int>& selectedIndex, Node*& pSelectedNode) const noexcept
+int Node::GetID() const noexcept
 {
-	//현재 노드의 인덱스를 저장
-	int curNodeIndex = nodeIndex;
-	//레퍼런스로 받아왔으니 재귀함수를 위해 다음 값으로 이동
-	nodeIndex++;
+	return id;
+}
 
+void Node::ShowTree(Node*& pSelectedNode) const noexcept
+{
+	const int selectedId = (pSelectedNode == nullptr) ? -1 : pSelectedNode->GetID();
 	ImGuiTreeNodeFlags flag = ImGuiTreeNodeFlags_OpenOnArrow // Arrow클릭시 펼쳐지는 플래그
-		| ((curNodeIndex == selectedIndex.value_or(-1)) ? ImGuiTreeNodeFlags_Selected : 0) //현재 노드의 인덱스가 selectedIndex와 같을때, -1은 아무것도 선택 x 선택플래그
+		| ((GetID() == selectedId) ? ImGuiTreeNodeFlags_Selected : 0) //현재 노드의 인덱스가 selectedIndex와 같을때, -1은 아무것도 선택 x 선택플래그
 		| ((childs.empty()) ? ImGuiTreeNodeFlags_Leaf : 0); //현재 노드의 자식이 없을 때 Leaf노드로 설정하는 플래그
 	//void* intptr_t
-	const auto expanded = ImGui::TreeNodeEx(reinterpret_cast<void*>(&curNodeIndex), flag, name.c_str());
+	const auto expanded = ImGui::TreeNodeEx(reinterpret_cast<void*>(GetID()), flag, name.c_str());
 	if (ImGui::IsItemClicked())
 	{
-		selectedIndex = curNodeIndex;
 		pSelectedNode = const_cast<Node*>(this);
 	}
 	if (expanded)
 	{
 		for (const auto& pChild : childs)
 		{
-			pChild->ShowTree(nodeIndex, selectedIndex, pSelectedNode);
+			pChild->ShowTree(pSelectedNode);
 		}
 		ImGui::TreePop();
 	}

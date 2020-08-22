@@ -469,14 +469,14 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 			RID_INPUT,
 			rawBuffer.data(),
 			&size,
-			sizeof(RAWINPUTHEADER)) == size)
+			sizeof(RAWINPUTHEADER)) != size)
 		{
 			break;
 		}
 
-		RAWINPUT rawVal = reinterpret_cast<const RAWINPUT&>(*rawBuffer.data());
+		auto& rawVal = reinterpret_cast<const RAWINPUT&>(*rawBuffer.data());
 		if (rawVal.header.dwType == RIM_TYPEMOUSE &&
-			rawVal.data.mouse.lLastX != 0 || rawVal.data.mouse.lLastY != 0)
+			(rawVal.data.mouse.lLastX != 0 || rawVal.data.mouse.lLastY != 0))
 		{
 			mouse.OnRawDelta(rawVal.data.mouse.lLastX, rawVal.data.mouse.lLastY);
 		}
