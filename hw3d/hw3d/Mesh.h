@@ -61,7 +61,7 @@ class Model
 public:
 	Model(Graphics& gfx, const std::string fileName);
 	~Model()noexcept;
-	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh);
+	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterial);
 	std::unique_ptr<Node> ParseNode(int& nextId,const aiNode& node);
 	void ShowWindow(const char* WindowName) noexcept;
 	void Draw(Graphics& gfx)const;

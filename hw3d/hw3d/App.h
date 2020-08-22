@@ -24,7 +24,7 @@ private:
 	Timer timer;
 	Camera cam;
 	PointLight Light;
-	Model nano{ wnd.GetGraphics(), "Models\\tank_fixed.fbx" };
+	Model nano{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
 	float speedFactors = 1.0f;
 private:
 };
