@@ -102,15 +102,6 @@
     <ClCompile Include="App.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawableBase.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
-    <ClCompile Include="Pyramid.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="GDIPlusManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -154,9 +145,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SolidSphere.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
-    <ClCompile Include="Cylinder.cpp">
       <Filter>소스 파일\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
@@ -245,26 +233,8 @@
     <ClInclude Include="Box.h">
       <Filter>헤더 파일\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="DrawableBase.h">
-      <Filter>헤더 파일\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="IndexedTriangleList.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="JHMath.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Cone.h">
-      <Filter>헤더 파일\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>헤더 파일\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Plane.h">
-      <Filter>헤더 파일\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Prism.h">
-      <Filter>헤더 파일\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="Sphere.h">
       <Filter>헤더 파일\Geometry</Filter>
@@ -337,6 +307,12 @@
     </ClInclude>
     <ClInclude Include="Graphicsinfra.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BindableCodex.h">
+      <Filter>헤더 파일\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexedTriangleList.h">
+      <Filter>헤더 파일\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

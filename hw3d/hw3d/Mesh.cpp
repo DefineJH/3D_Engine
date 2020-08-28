@@ -111,52 +111,56 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		indices.push_back(face.mIndices[2]);
 	}
 
-	std::vector<std::unique_ptr<Bindable>> bindablePtrs;
+	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
 
 	bool hasSpecular = false;
-
+	float shininess = 35.0f;
 	if (mesh.mMaterialIndex >= 0)
 	{
 		using namespace std::string_literals;
 		const aiMaterial* mat = pMaterials[mesh.mMaterialIndex];
 		aiString texFileName;
 		mat->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &texFileName);
-		bindablePtrs.push_back(std::make_unique<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str())));
+		bindablePtrs.push_back(std::make_shared<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str())));
 		if (mat->GetTexture(aiTextureType::aiTextureType_SPECULAR, 0, &texFileName) == aiReturn_SUCCESS)
 		{
 			hasSpecular = true;
-			bindablePtrs.push_back(std::make_unique<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str()),1));
+			bindablePtrs.push_back(std::make_shared<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str()),1));
 		}
-		bindablePtrs.push_back(std::make_unique<Sampler>(gfx));
+		else
+		{
+			mat->Get(AI_MATKEY_SHININESS, shininess);
+		}
+		bindablePtrs.push_back(std::make_shared<Sampler>(gfx));
 	}
 
-	bindablePtrs.push_back(std::make_unique<VertexBuffer>(gfx, vBuf));
-	bindablePtrs.push_back(std::make_unique<IndexBuffer>(gfx, indices));
+	bindablePtrs.push_back(std::make_shared<VertexBuffer>(gfx, vBuf));
+	bindablePtrs.push_back(std::make_shared<IndexBuffer>(gfx, indices));
 
-	auto pVertexShader = std::make_unique<VertexShader>(gfx, L"PhongVS.cso");
+	auto pVertexShader = std::make_shared<Bind::VertexShader>(gfx, "PhongVS.cso");
 	auto pVertexShaderByteCode = pVertexShader->GetBytecode();
 
 	bindablePtrs.push_back(std::move(pVertexShader));
 	if (hasSpecular)
 	{
-		bindablePtrs.push_back(std::make_unique<PixelShader>(gfx, L"PhongPS_Spec.cso"));
+		bindablePtrs.push_back(std::make_shared<PixelShader>(gfx, L"PhongPS_Spec.cso"));
 	}
 	else
 	{
-		bindablePtrs.push_back(std::make_unique<PixelShader>(gfx, L"PhongPS.cso"));
+		bindablePtrs.push_back(std::make_shared<PixelShader>(gfx, L"PhongPS.cso"));
 	}
-	bindablePtrs.push_back(std::make_unique<InputLayout>(gfx, vBuf.GetLayout().GetD3DLayout(), pVertexShaderByteCode));
+	bindablePtrs.push_back(std::make_shared<InputLayout>(gfx, vBuf.GetLayout().GetD3DLayout(), pVertexShaderByteCode));
 
 	struct PSMaterialConstant
 	{
 		float specularInten = 1.6f;
-		float specularPower = 50.0f;
+		float specularPower;
 		float padding[2];
-	};
+	}pmc;
+	pmc.specularPower = shininess;
+	
+	bindablePtrs.push_back(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, pmc, 1u));
 
-	PSMaterialConstant psc;
-
-	bindablePtrs.push_back(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, psc, 1u));
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));
 }
 
@@ -266,27 +270,16 @@ void Node::AddChild(std::unique_ptr<Node> pChild) noexcept(!IS_DEBUG)
 	childs.push_back(std::move(pChild));
 }
 
-Mesh::Mesh(Graphics& gfx, std::vector<std::unique_ptr<Bindable>> bindPtr)
+Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtr)
 {
-	if (!IsStaticInitalized())
-	{
-		AddStaticBind(std::make_unique<Topology>(gfx));
-	}
-
+	AddBind(std::make_shared<Bindable>(gfx));
 	//model로부터 받은 bindPtr들을 전부받아 묶는다
 	for (auto& pb : bindPtr)
 	{
-		if (auto pi = dynamic_cast<IndexBuffer*>(pb.get()))
-		{
-			AddIndexBuffer(std::unique_ptr<IndexBuffer>{ pi });
-			//원래 가지고 있던 소유권을 해제함
-			pb.release();
-		}
-		else
-			AddBind(std::move(pb));
+		AddBind(std::move(pb));
 	}
 	//하나의 메쉬마다 서로다른 포지션값을 가지기 때문에
-	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
+	AddBind(std::make_shared<TransformCbuf>(gfx, *this));
 }
 
 void Mesh::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept(!IS_DEBUG)

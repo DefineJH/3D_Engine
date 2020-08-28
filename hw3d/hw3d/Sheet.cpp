@@ -27,17 +27,6 @@ Sheet::Sheet(Graphics& gfx,
 {
 	namespace dx = DirectX;
 
-	if (!IsStaticInitalized())
-	{
-		struct Vertex
-		{
-			dx::XMFLOAT3 pos;
-			struct
-			{
-				float u;
-				float v;
-			} tex;
-		};
 		auto model = Plane::Make<Vertex>();
 		model.vertices[0].tex = { 0.0f,0.0f };
 		model.vertices[1].tex = { 1.0f,0.0f };
@@ -72,17 +61,7 @@ Sheet::Sheet(Graphics& gfx,
 		SetIndexFromStatic();
 	}
 
-	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
-}
-
-void Sheet::Update(float dt) noexcept
-{
-	roll += droll * dt;
-	pitch += dpitch * dt;
-	yaw += dyaw * dt;
-	theta += dtheta * dt;
-	phi += dphi * dt;
-	chi += dchi * dt;
+	AddBind(std::shared_ptr<TransformCbuf>(gfx, *this));
 }
 
 DirectX::XMMATRIX Sheet::GetTransformXM() const noexcept

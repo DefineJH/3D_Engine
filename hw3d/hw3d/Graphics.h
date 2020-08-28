@@ -14,7 +14,7 @@
 class Graphics
 {
 	//bindable을 friend class로 등록함으로써 Graphics 내의 객체에 접근이 가능케 함
-	friend class Bindable;
+	friend class Bind::Bindable;
 public:
 	class Exception : public JHException
 	{
