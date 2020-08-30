@@ -1,13 +1,16 @@
 #include "Texture.h"
 #include "GraphicsThrowMacro.h"
+#include "BindableCodex.h"
 
 namespace wrl = Microsoft::WRL;
 
-Texture::Texture(Graphics& gfx, const Surface& s, unsigned int slot)
+Texture::Texture(Graphics& gfx, const std::string& path, unsigned int slot)
 	:
-	slot(slot)
+	path(path),slot(slot)
 {
 	INFOMAN(gfx);
+
+	const auto s = Surface::FromFile(path);
 
 	// create texture resource
 	D3D11_TEXTURE2D_DESC textureDesc = {};
@@ -44,4 +47,20 @@ Texture::Texture(Graphics& gfx, const Surface& s, unsigned int slot)
 void Texture::Bind(Graphics& gfx) noexcept
 {
 	GetContext(gfx)->PSSetShaderResources(slot, 1u, pTextureView.GetAddressOf());
+}
+
+std::shared_ptr<Bindable> Texture::Resolve(Graphics& gfx, const std::string& path, unsigned int slot)
+{
+	return Codex::Resolve<Texture>(gfx, path, slot);
+}
+
+std::string Texture::GenerateUID(const std::string& path, unsigned int slot)
+{
+	using namespace std::string_literals;
+	return typeid(Texture).name() + "#"s + path + "#"s + std::to_string(slot);
+}
+
+std::string Texture::GetUID() const noexcept
+{
+	return GenerateUID(path, slot);
 }

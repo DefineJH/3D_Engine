@@ -1,6 +1,5 @@
 #pragma once
 #include "App.h"
-#include "Box.h"
 #include <optional>
 #include <sstream>
 #include <iomanip>

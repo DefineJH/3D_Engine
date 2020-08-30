@@ -114,9 +114,6 @@
     <ClCompile Include="Sampler.cpp">
       <Filter>소스 파일\Bindable</Filter>
     </ClCompile>
-    <ClCompile Include="Sheet.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="ImGUI\imgui.cpp">
       <Filter>ImGUI</Filter>
     </ClCompile>
@@ -144,14 +141,14 @@
     <ClCompile Include="PointLight.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SolidSphere.cpp">
-      <Filter>소스 파일\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Graphicsinfra.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SolidSphere.cpp">
+      <Filter>소스 파일\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -198,9 +195,6 @@
       <Filter>헤더 파일\Macro</Filter>
     </ClInclude>
     <ClInclude Include="Bindable.h">
-      <Filter>헤더 파일\Bindable</Filter>
-    </ClInclude>
-    <ClInclude Include="BindableBase.h">
       <Filter>헤더 파일\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
@@ -251,12 +245,6 @@
     <ClInclude Include="Sampler.h">
       <Filter>헤더 파일\Bindable</Filter>
     </ClInclude>
-    <ClInclude Include="Sheet.h">
-      <Filter>헤더 파일\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="Pyramid.h">
-      <Filter>헤더 파일\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="ImGUI\imgui.h">
       <Filter>ImGUI</Filter>
     </ClInclude>
@@ -290,9 +278,6 @@
     <ClInclude Include="PointLight.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SolidSphere.h">
-      <Filter>헤더 파일\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="TestObj.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -313,6 +298,12 @@
     </ClInclude>
     <ClInclude Include="IndexedTriangleList.h">
       <Filter>헤더 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindablebase.h">
+      <Filter>헤더 파일\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="SolidSphere.h">
+      <Filter>헤더 파일\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

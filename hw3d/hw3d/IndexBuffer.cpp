@@ -1,24 +1,29 @@
 #include "IndexBuffer.h"
 #include "GraphicsThrowMacro.h"
+#include "BindableCodex.h"
 
-IndexBuffer::IndexBuffer(Graphics& gfx, const std::vector<unsigned short>& indicies)
+
+IndexBuffer::IndexBuffer(Graphics& gfx, const std::vector<unsigned short>& indices)
 	:
-	count( (UINT)indicies.size())
+	IndexBuffer(gfx, "?", indices)
+{}
+IndexBuffer::IndexBuffer(Graphics& gfx, std::string tag, const std::vector<unsigned short>& indices)
+	:
+	tag(tag),
+	count((UINT)indices.size())
 {
 	INFOMAN(gfx);
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
-	bd.ByteWidth = UINT(count * sizeof(unsigned short));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0u;
-	bd.MiscFlags = 0u;
-	bd.StructureByteStride = sizeof(unsigned short);
 
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = indicies.data();
-
-	GFX_THROW_INFO(GetDevice(gfx)->CreateBuffer(&bd, &sd, &pIndexBuffer));
-
+	D3D11_BUFFER_DESC ibd = {};
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.CPUAccessFlags = 0u;
+	ibd.MiscFlags = 0u;
+	ibd.ByteWidth = UINT(count * sizeof(unsigned short));
+	ibd.StructureByteStride = sizeof(unsigned short);
+	D3D11_SUBRESOURCE_DATA isd = {};
+	isd.pSysMem = indices.data();
+	GFX_THROW_INFO(GetDevice(gfx)->CreateBuffer(&ibd, &isd, &pIndexBuffer));
 }
 
 void IndexBuffer::Bind(Graphics& gfx) noexcept
@@ -29,4 +34,18 @@ void IndexBuffer::Bind(Graphics& gfx) noexcept
 UINT IndexBuffer::GetCount() const noexcept
 {
 	return count;
+}
+std::shared_ptr<IndexBuffer> IndexBuffer::Resolve(Graphics& gfx, const std::string& tag,
+	const std::vector<unsigned short>& indices)
+{
+	return Codex::Resolve<IndexBuffer>(gfx, tag, indices);
+}
+std::string IndexBuffer::GenerateUID_(const std::string& tag)
+{
+	using namespace std::string_literals;
+	return typeid(IndexBuffer).name() + "#"s + tag;
+}
+std::string IndexBuffer::GetUID() const noexcept
+{
+	return GenerateUID_(tag);
 }

@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include "ImGUI/imgui.h"
 #include "Surface.h"
+#include "Bindablebase.h"
 #include <unordered_map>
 
 class ModelWindow
@@ -110,7 +111,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		indices.push_back(face.mIndices[1]);
 		indices.push_back(face.mIndices[2]);
 	}
-
+	
 	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
 
 	bool hasSpecular = false;
@@ -121,35 +122,36 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		const aiMaterial* mat = pMaterials[mesh.mMaterialIndex];
 		aiString texFileName;
 		mat->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &texFileName);
-		bindablePtrs.push_back(std::make_shared<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str())));
+		bindablePtrs.push_back(Texture::Resolve(gfx,"Models\\Texture\\"s + texFileName.C_Str()));
 		if (mat->GetTexture(aiTextureType::aiTextureType_SPECULAR, 0, &texFileName) == aiReturn_SUCCESS)
 		{
 			hasSpecular = true;
-			bindablePtrs.push_back(std::make_shared<Texture>(gfx, Surface::FromFile("Models\\Texture\\"s + texFileName.C_Str()),1));
+			bindablePtrs.push_back(Texture::Resolve(gfx, "Models\\Texture\\"s + texFileName.C_Str(),1));
 		}
 		else
 		{
 			mat->Get(AI_MATKEY_SHININESS, shininess);
 		}
-		bindablePtrs.push_back(std::make_shared<Sampler>(gfx));
+		bindablePtrs.push_back(Sampler::Resolve( gfx ) );
 	}
 
-	bindablePtrs.push_back(std::make_shared<VertexBuffer>(gfx, vBuf));
-	bindablePtrs.push_back(std::make_shared<IndexBuffer>(gfx, indices));
+	auto meshTag = mesh.mName.C_Str();
+	bindablePtrs.push_back(VertexBuffer::Resolve(gfx,meshTag,vBuf));
+	bindablePtrs.push_back(IndexBuffer::Resolve(gfx, meshTag, indices));
 
-	auto pVertexShader = std::make_shared<Bind::VertexShader>(gfx, "PhongVS.cso");
-	auto pVertexShaderByteCode = pVertexShader->GetBytecode();
+	auto pVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");
+	auto pVertexShaderByteCode = static_cast<VertexShader&>(*pVertexShader).GetBytecode();
 
 	bindablePtrs.push_back(std::move(pVertexShader));
 	if (hasSpecular)
 	{
-		bindablePtrs.push_back(std::make_shared<PixelShader>(gfx, L"PhongPS_Spec.cso"));
+		bindablePtrs.push_back(PixelShader::Resolve(gfx, "PhongPS_Spec.cso"));
 	}
 	else
 	{
-		bindablePtrs.push_back(std::make_shared<PixelShader>(gfx, L"PhongPS.cso"));
+		bindablePtrs.push_back(PixelShader::Resolve(gfx, "PhongPS.cso"));
 	}
-	bindablePtrs.push_back(std::make_shared<InputLayout>(gfx, vBuf.GetLayout().GetD3DLayout(), pVertexShaderByteCode));
+	bindablePtrs.push_back(InputLayout::Resolve(gfx, vBuf.GetLayout(), pVertexShaderByteCode));
 
 	struct PSMaterialConstant
 	{
@@ -159,7 +161,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	}pmc;
 	pmc.specularPower = shininess;
 	
-	bindablePtrs.push_back(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(gfx, pmc, 1u));
+	bindablePtrs.push_back(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, pmc, 1u));
 
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));
 }
@@ -272,7 +274,7 @@ void Node::AddChild(std::unique_ptr<Node> pChild) noexcept(!IS_DEBUG)
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtr)
 {
-	AddBind(std::make_shared<Bindable>(gfx));
+	AddBind(std::make_shared<Topology>(gfx));
 	//model로부터 받은 bindPtr들을 전부받아 묶는다
 	for (auto& pb : bindPtr)
 	{

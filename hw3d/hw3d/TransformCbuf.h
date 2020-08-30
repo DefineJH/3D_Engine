@@ -2,6 +2,7 @@
 #include "ConstantBuffer.h"
 #include "Drawable.h"
 #include <DirectXMath.h>
+
 class TransformCbuf :
 	public Bindable
 {
@@ -22,4 +23,5 @@ private:
 	// 나중에 현재 transfromcbuf가 속해있는 객체의 월드 좌표행렬을 알아야 버텍스 버퍼에 연산을 진행가능하기 때문에
 	const Drawable& parent;
 };
+
 

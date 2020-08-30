@@ -1,8 +1,10 @@
 #pragma once
 #include "Bindable.h"
 #include "GraphicsThrowMacro.h"
+#include "BindableCodex.h"
 
 //const 버퍼는 어떤 타입이던간에 직접 정의하여 넘길 수 있으므로 템플릿화한다
+
 template<typename T>
 class ConstantBuffer :
 	public Bindable
@@ -81,6 +83,27 @@ public:
 	{
 		GetContext(gfx)->VSSetConstantBuffers(slot, 1u, pConstBuffer.GetAddressOf());
 	}
+	static std::shared_ptr<VertexConstantBuffer> Resolve(Graphics& gfx, const T& consts, UINT slot = 0)
+	{
+		return Codex::Resolve<VertexConstantBuffer>(gfx, consts, slot);
+	}
+	static std::shared_ptr<VertexConstantBuffer> Resolve(Graphics& gfx, UINT slot = 0)
+	{
+		return Codex::Resolve<VertexConstantBuffer>(gfx, slot);
+	}
+	static std::string GenerateUID(const T&, UINT slot)
+	{
+		return GenerateUID(slot);
+	}
+	static std::string GenerateUID(UINT slot = 0)
+	{
+		using namespace std::string_literals;
+		return typeid(VertexConstantBuffer).name() + "#"s + std::to_string(slot);
+	}
+	std::string GetUID() const noexcept override
+	{
+		return GenerateUID(slot);
+	}
 };
 
 //픽셀 쉐이더에 넘기는 버전 생성, 딱히 다르지 않음
@@ -95,5 +118,26 @@ public:
 	void Bind(Graphics& gfx) noexcept override
 	{
 		GetContext(gfx)->PSSetConstantBuffers(slot, 1u, pConstBuffer.GetAddressOf());
+	}
+	static std::shared_ptr<PixelConstantBuffer> Resolve(Graphics& gfx, const T& consts, UINT slot = 0)
+	{
+		return Codex::Resolve<PixelConstantBuffer>(gfx, consts, slot);
+	}
+	static std::shared_ptr<PixelConstantBuffer> Resolve(Graphics& gfx, UINT slot = 0)
+	{
+		return Codex::Resolve<PixelConstantBuffer>(gfx, slot);
+	}
+	static std::string GenerateUID(const T&, UINT slot)
+	{
+		return GenerateUID(slot);
+	}
+	static std::string GenerateUID(UINT slot = 0)
+	{
+		using namespace std::string_literals;
+		return typeid(PixelConstantBuffer).name() + "#"s + std::to_string(slot);
+	}
+	std::string GetUID() const noexcept override
+	{
+		return GenerateUID(slot);
 	}
 };

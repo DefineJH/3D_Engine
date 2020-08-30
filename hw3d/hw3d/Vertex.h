@@ -34,42 +34,49 @@ namespace DynamicVertex
 			//static constexpr로 설정하지 않으면 런타임에 실제 객체를 생성해야하기 때문에 static으로 생성해 메모리를 할당
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32_FLOAT;
 			static constexpr const char* semantic = "Position";
+			static constexpr const char* code = "P2";
 		};
 		template<> struct Map<Position3D>
 		{
 			using SysType = DirectX::XMFLOAT3;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* semantic = "Position";
+			static constexpr const char* code = "P3";
 		};
 		template<> struct Map<Texture2D>
 		{
 			using SysType = DirectX::XMFLOAT2;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32_FLOAT;
 			static constexpr const char* semantic = "Texcoord";
+			static constexpr const char* code = "T2";
 		};
 		template<> struct Map<Normal>
 		{
 			using SysType = DirectX::XMFLOAT3;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* semantic = "Normal";
+			static constexpr const char* code = "N3";
 		};
 		template<> struct Map<Float3Color>
 		{
 			using SysType = DirectX::XMFLOAT3;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* semantic = "Color";
+			static constexpr const char* code = "C3";
 		};
 		template<> struct Map<Float4Color>
 		{
 			using SysType = DirectX::XMFLOAT4;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			static constexpr const char* semantic = "Color";
+			static constexpr const char* code = "C4";
 		};
 		template<> struct Map<BGRAColor>
 		{
 			using SysType = DynamicVertex::BGRAColor;
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			static constexpr const char* semantic = "Color";
+			static constexpr const char* code = "C8";
 		};
 		class Element
 		{
@@ -138,6 +145,28 @@ namespace DynamicVertex
 				assert("Invalid element type" && false);
 				return { "INVALID",0,DXGI_FORMAT_UNKNOWN,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 };
 			}
+
+			const char* GetElemCode() const
+			{
+				switch (type)
+				{
+				case Position2D:
+					return Map<Position2D>::code;
+				case Position3D:
+					return Map<Position3D>::code;
+				case Texture2D:
+					return Map<Texture2D>::code;
+				case Normal:
+					return Map<Normal>::code;
+				case Float3Color:
+					return Map<Float3Color>::code;
+				case Float4Color:
+					return Map<Float4Color>::code;
+				case BGRAColor:
+					return Map<BGRAColor>::code;
+				}
+				return "";
+			}
 		private:
 			template<ElementType type>
 			static constexpr D3D11_INPUT_ELEMENT_DESC GenerateDesc(size_t offset) noexcept(!IS_DEBUG)
@@ -193,7 +222,15 @@ namespace DynamicVertex
 			}
 			return desc;
 		}
-		
+		std::string GetLayoutCode() const noexcept
+		{
+			std::string returnCode;
+			for (const Element& e : elements)
+			{
+				returnCode += e.GetElemCode();
+			}
+			return returnCode;
+		}
 	private:
 		std::vector<Element> elements;
 	};

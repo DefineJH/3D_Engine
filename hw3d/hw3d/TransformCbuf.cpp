@@ -1,4 +1,5 @@
 #include "TransformCbuf.h"
+
 TransformCbuf::TransformCbuf(Graphics& gfx, const Drawable& parent, UINT slot)
 	:
 	parent(parent)
@@ -28,3 +29,4 @@ void TransformCbuf::Bind(Graphics& gfx) noexcept
 }
 
 std::unique_ptr<VertexConstantBuffer<TransformCbuf::Transforms>> TransformCbuf::vcbuf;
+
