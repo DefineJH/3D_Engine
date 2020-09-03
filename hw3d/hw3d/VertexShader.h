@@ -7,7 +7,7 @@ class VertexShader :
 public:
 	VertexShader(Graphics& gfx, const std::string& path);
 	void Bind(Graphics& gfx) noexcept override;
-	static std::shared_ptr<Bindable> Resolve(Graphics& gfx, const std::string& path);
+	static std::shared_ptr<VertexShader> Resolve(Graphics& gfx, const std::string& path);
 	static std::string GenerateUID(const std::string& path);
 	std::string GetUID() const noexcept override;
 	ID3DBlob* GetBytecode() const noexcept;

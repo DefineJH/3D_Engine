@@ -150,6 +150,9 @@
     <ClCompile Include="SolidSphere.cpp">
       <Filter>소스 파일\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="TestPlane.cpp">
+      <Filter>소스 파일\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -305,6 +308,12 @@
     <ClInclude Include="SolidSphere.h">
       <Filter>헤더 파일\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>헤더 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="TestPlane.h">
+      <Filter>헤더 파일\Drawable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc">
@@ -350,6 +359,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="PhongPS_Spec.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongPS_SpecNormal.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

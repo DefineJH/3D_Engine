@@ -36,7 +36,7 @@ void VertexBuffer::Bind(Graphics& gfx) noexcept
 
 
 
-std::shared_ptr<Bindable> VertexBuffer::Resolve(Graphics& gfx,const std::string& tag, const DynamicVertex::VertexBuffer& vbuf)
+std::shared_ptr<VertexBuffer> VertexBuffer::Resolve(Graphics& gfx,const std::string& tag, const DynamicVertex::VertexBuffer& vbuf)
 {
 	return Codex::Resolve<VertexBuffer>(gfx,tag ,vbuf);
 }

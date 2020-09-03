@@ -49,7 +49,7 @@ void Texture::Bind(Graphics& gfx) noexcept
 	GetContext(gfx)->PSSetShaderResources(slot, 1u, pTextureView.GetAddressOf());
 }
 
-std::shared_ptr<Bindable> Texture::Resolve(Graphics& gfx, const std::string& path, unsigned int slot)
+std::shared_ptr<Texture> Texture::Resolve(Graphics& gfx, const std::string& path, unsigned int slot)
 {
 	return Codex::Resolve<Texture>(gfx, path, slot);
 }

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "PointLight.h"
+#include "TestPlane.h"
 #include <set>
 #include <optional>
 class Box;
@@ -25,6 +26,8 @@ private:
 	Camera cam;
 	PointLight Light;
 	Model nano{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
+	Model nano2{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
+	TestPlane plane{ wnd.GetGraphics(),5 };
 	float speedFactors = 1.0f;
 private:
 };

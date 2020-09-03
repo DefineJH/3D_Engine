@@ -39,8 +39,9 @@ void App::DoFrame()
 	//pixel cb register0
 	Light.Bind(wnd.GetGraphics(), wnd.GetGraphics().GetCamera());
 	//pixel cb register1
-	nano.Draw(wnd.GetGraphics());
-
+	//nano.Draw(wnd.GetGraphics());
+	//nano2.Draw(wnd.GetGraphics());
+	plane.Draw(wnd.GetGraphics());
 	Light.Draw(wnd.GetGraphics());
 	while (!wnd.kbd.KeyIsEmpty())
 	{
@@ -111,6 +112,7 @@ void App::DoFrame()
 	ImGui::End();
 
 	nano.ShowWindow("Nano");
+	nano2.ShowWindow("Nano2");
 	cam.SpawnControlWindow();
 	Light.SpawnControlWindow();
 	SpawnWindow();

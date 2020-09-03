@@ -24,10 +24,10 @@ void VertexShader::Bind(Graphics& gfx) noexcept
 	GetContext(gfx)->VSSetShader(pVertexShader.Get(), nullptr, 0u);
 }
 
-std::shared_ptr<Bindable> VertexShader::Resolve(Graphics& gfx, const std::string& path)
+std::shared_ptr<VertexShader> VertexShader::Resolve(Graphics& gfx, const std::string& path)
 {
 	//Bindable이 이미 있는지 확인
-	std::shared_ptr<Bindable> bind = Codex::Resolve<VertexShader>(gfx, path);
+	std::shared_ptr<VertexShader> bind = Codex::Resolve<VertexShader>(gfx, path);
 	return bind;
 }
 

@@ -183,6 +183,7 @@
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="SolidSphere.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="TestPlane.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Topology.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sampler.h" />
@@ -235,6 +237,7 @@
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TestObj.h" />
+    <ClInclude Include="TestPlane.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Topology.h" />
@@ -272,6 +275,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="PhongPS_SpecNormal.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="PhongPS_Spec.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

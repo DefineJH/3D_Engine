@@ -8,7 +8,7 @@ class Texture :
 public:
 	Texture(Graphics& gfx, const std::string& path, unsigned int slot = 0);
 	virtual void Bind(Graphics& gfx) noexcept;
-	static std::shared_ptr<Bindable> Resolve(Graphics& gfx, const std::string& path, unsigned int slot = 0);
+	static std::shared_ptr<Texture> Resolve(Graphics& gfx, const std::string& path, unsigned int slot = 0);
 	static std::string GenerateUID(const std::string& path, unsigned int slot);
 	std::string GetUID() const noexcept override;
 private:
