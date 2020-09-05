@@ -36,7 +36,7 @@ TestPlane::TestPlane(Graphics& gfx, float size)
 
 	AddBind(Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
-	AddBind(std::make_shared<TransformCbuf>(gfx, *this));
+	AddBind(std::make_shared<TransformCbuf_Double>(gfx, *this,0u,1u));
 }
 
 void TestPlane::SetPos(DirectX::XMFLOAT3 pos) noexcept

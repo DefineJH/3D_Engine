@@ -14,6 +14,9 @@ public:
 	};
 	TransformCbuf(Graphics& gfx, const Drawable& parent , UINT slot = 0u);
 	void Bind(Graphics& gfx) noexcept override;
+public:
+	virtual void UpdateBindImpl(Graphics& gfx, const Transforms& tr) noexcept;
+	Transforms GetTransforms(Graphics& gfx); 
 private:
 	//보면 constbuffer로 가지고 있다. 이는 즉, 매 프레임마다 실제 버텍스 버퍼를 바꾸는 것이 아닌
 	//버텍스 쉐이더에 제공하는 상수버퍼의 값으로 연산을 진행해 화면에 출력하는 것임이 중요하다

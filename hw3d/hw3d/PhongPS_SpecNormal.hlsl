@@ -9,6 +9,13 @@ cbuffer LightCBuf
     float attQuad;
 };
 
+cbuffer CBuf
+{
+	//Camera 기준 버텍스의 좌표
+	matrix modelView;
+	//사영까지 완료한 즉, NDC공간에 위치한 좌표
+	matrix modelViewProj;
+};
 Texture2D tex;
 Texture2D spec;
 Texture2D normal;
@@ -22,7 +29,7 @@ float4 main(float3 worldPos : Position, float3 n : Normal, float2 tc : Texcoord)
     n.x = normalSample.x * 2.0f - 1.0f;
     n.y = -normalSample.y * 2.0f - 1.0f;
     n.z = -normalSample.z;
-    
+	n = mul(n, (float3x3)modelView);
 	// fragment to light vector data
     const float3 vToL = lightPos - worldPos;
     const float distToL = length(vToL);

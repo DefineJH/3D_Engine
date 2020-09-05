@@ -8,5 +8,6 @@
 #include "Texture.h"
 #include "Topology.h"
 #include "TransformCbuf.h"
+#include "TransformCbuf_Double.h"
 #include "VertexBuffer.h"
 #include "VertexShader.h"

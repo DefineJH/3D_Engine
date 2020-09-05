@@ -153,6 +153,9 @@
     <ClCompile Include="TestPlane.cpp">
       <Filter>소스 파일\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="TransformCbuf_Double.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -313,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="TestPlane.h">
       <Filter>헤더 파일\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformCbuf_Double.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
