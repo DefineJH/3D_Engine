@@ -25,9 +25,7 @@ private:
 	Timer timer;
 	Camera cam;
 	PointLight Light;
-	Model nano{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
-	Model nano2{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
-	TestPlane plane{ wnd.GetGraphics(),5 };
+	Model plane{ wnd.GetGraphics(), "Models\\brick_wall.obj" };
 	float speedFactors = 1.0f;
 private:
 };

@@ -23,6 +23,8 @@ namespace DynamicVertex
 			Position3D,
 			Texture2D,
 			Normal,
+			Tangent,
+			BiTangent,
 			Float3Color,
 			Float4Color,
 			BGRAColor,
@@ -56,6 +58,20 @@ namespace DynamicVertex
 			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* semantic = "Normal";
 			static constexpr const char* code = "N3";
+		};
+		template<> struct Map<Tangent>
+		{
+			using SysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* semantic = "Tangent";
+			static constexpr const char* code = "T3";
+		};
+		template<> struct Map<BiTangent>
+		{
+			using SysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* semantic = "BiTangent";
+			static constexpr const char* code = "BT3";
 		};
 		template<> struct Map<Float3Color>
 		{
@@ -113,6 +129,10 @@ namespace DynamicVertex
 					return sizeof(Map<Texture2D>::SysType);
 				case VertexLayout::Normal:
 					return sizeof(Map<Normal>::SysType);
+				case VertexLayout::Tangent:
+					return sizeof(Map<Tangent>::SysType);
+				case VertexLayout::BiTangent:
+					return sizeof(Map<BiTangent>::SysType);
 				case VertexLayout::Float3Color:
 					return sizeof(Map<Float3Color>::SysType);
 				case VertexLayout::Float4Color:
@@ -135,6 +155,10 @@ namespace DynamicVertex
 					return GenerateDesc<Texture2D>(GetOffset());
 				case Normal:
 					return GenerateDesc<Normal>(GetOffset());
+				case Tangent:
+					return GenerateDesc<Tangent>(GetOffset());
+				case BiTangent:
+					return GenerateDesc<BiTangent>(GetOffset());
 				case Float3Color:
 					return GenerateDesc<Float3Color>(GetOffset());
 				case Float4Color:
@@ -158,6 +182,10 @@ namespace DynamicVertex
 					return Map<Texture2D>::code;
 				case Normal:
 					return Map<Normal>::code;
+				case Tangent:
+					return Map<Tangent>::code;
+				case BiTangent:
+					return Map<BiTangent>::code;
 				case Float3Color:
 					return Map<Float3Color>::code;
 				case Float4Color:
@@ -279,6 +307,12 @@ namespace DynamicVertex
 				break;
 			case VertexLayout::Normal:
 				SetAttribute<VertexLayout::Normal>(pAttribute, std::forward<T>(val));
+				break;
+			case VertexLayout::Tangent:
+				SetAttribute<VertexLayout::Tangent>(pAttribute, std::forward<T>(val));
+				break;
+			case VertexLayout::BiTangent:
+				SetAttribute<VertexLayout::BiTangent>(pAttribute, std::forward<T>(val));
 				break;
 			case VertexLayout::Float3Color:
 				SetAttribute<VertexLayout::Float3Color>(pAttribute, std::forward<T>(val));

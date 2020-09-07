@@ -22,4 +22,5 @@ void TransformCbuf_Double::UpdateBindImpl(Graphics& gfx, const Transforms& tr) n
 	pPCBuf->Update(gfx, tr);
 	pPCBuf->Bind(gfx);
 }
+
 std::unique_ptr<PixelConstantBuffer<TransformCbuf::Transforms>> TransformCbuf_Double::pPCBuf;
