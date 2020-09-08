@@ -25,7 +25,6 @@ private:
 	};
 private:
 	PointLightCBuf cbData;
-	float DiffuseColor[3];
 	mutable SolidSphere mesh;
 	mutable PixelConstantBuffer<PointLightCBuf> cbuf;
 };

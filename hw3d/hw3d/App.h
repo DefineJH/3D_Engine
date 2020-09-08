@@ -25,7 +25,7 @@ private:
 	Timer timer;
 	Camera cam;
 	PointLight Light;
-	Model plane{ wnd.GetGraphics(), "Models\\brick_wall.obj" };
+	Model Gob{ wnd.GetGraphics(), "Models\\nanosuit.obj" };
 	float speedFactors = 1.0f;
 private:
 };

@@ -33,6 +33,22 @@ class Node
 	friend class Model;
 	friend class ModelWindow;
 public:
+	struct PSMaterialConstantFullmonte
+	{
+		BOOL  normalMapEnabled = TRUE;
+		BOOL  specularMapEnabled = TRUE;
+		BOOL  hasGlossMap = FALSE;
+		float specularPower = 3.1f;
+		DirectX::XMFLOAT3 specularColor = { 0.75f,0.75f,0.75f };
+		float specularMapWeight = 0.671f;
+	};
+	struct PSMaterialConstantNotex
+	{
+		DirectX::XMFLOAT4 materialColor = { 0.447970f,0.327254f,0.176283f,1.0f };
+		DirectX::XMFLOAT4 specularColor = { 0.65f,0.65f,0.65f,1.0f };
+		float specularPower = 120.0f;
+		float padding[3];
+	};
 	Node(int id,const std::string& Name, std::vector<Mesh*> MeshPtrs, const DirectX::XMMATRIX& transform) noexcept;
 	void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept(!IS_DEBUG);
 	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;

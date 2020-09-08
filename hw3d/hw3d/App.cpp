@@ -39,7 +39,7 @@ void App::DoFrame()
 	//pixel cb register0
 	Light.Bind(wnd.GetGraphics(), wnd.GetGraphics().GetCamera());
 	//pixel cb register1
-	plane.Draw(wnd.GetGraphics());
+	Gob.Draw(wnd.GetGraphics());
 	Light.Draw(wnd.GetGraphics());
 	while (!wnd.kbd.KeyIsEmpty())
 	{
