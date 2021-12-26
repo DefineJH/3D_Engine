@@ -2,6 +2,7 @@
 #include "ImGUI/imgui.h"
 #include "Surface.h"
 #include "Bindablebase.h"
+#include <stdexcept>
 #include <unordered_map>
 
 class ModelWindow
