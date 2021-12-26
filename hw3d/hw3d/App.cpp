@@ -110,6 +110,7 @@ void App::DoFrame()
 	ImGui::End();
 	cam.SpawnControlWindow();
 	Light.SpawnControlWindow();
+	Gob.ShowWindow("");
 	SpawnWindow();
 #endif
 	wnd.GetGraphics().EndFrame();

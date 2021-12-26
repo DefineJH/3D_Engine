@@ -46,7 +46,7 @@ public:
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 private:
-	Node* pSelectedNode;
+	Node* pSelectedNode = nullptr;
 	struct STransform
 	{
 		float roll = 0.0f;
@@ -102,6 +102,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	float shininess = 2.0f;
 	DirectX::XMFLOAT4 specularColor = { 0.18f,0.18f,0.18f,1.0f };
 	DirectX::XMFLOAT4 diffuseColor = { 0.45f,0.45f,0.85f,1.0f };
+
+	//메쉬 내부 머터리얼 처리
 	if (mesh.mMaterialIndex >= 0)
 	{
 		auto& material = *pMaterials[mesh.mMaterialIndex];
